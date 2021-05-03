@@ -21,11 +21,13 @@ const options = {
 const server = tls.createServer(options, (socket) => {
   console.log('server connected',
     socket.authorized ? 'authorized' : 'unauthorized');
-  // socket.setEncoding('utf8');
-  console.log(socket);
   const buffer = schema.encodeDemo({ x: 1, y: 3.13 });
 
-  socket.on('data', (message: Buffer | string) => {
+  socket.on('data', (message: Buffer) => {
+
+    if (message instanceof String) {
+      socket.end();
+    }
 
   });
   socket.write(buffer);
@@ -37,5 +39,3 @@ server.on('end', () => { });
 server.listen(8000, () => {
   console.log('server bound');
 });
-
-
