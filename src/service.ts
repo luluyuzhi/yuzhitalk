@@ -9,9 +9,6 @@ const schema = pbjs.parseSchema(`
   }
 `).compile();
 
-
-
-
 const options = {
   key: fs.readFileSync('./tlsCa/ryans-key.pem'),
   cert: fs.readFileSync('./tlsCa/ryans-cert.pem'),
@@ -21,15 +18,12 @@ const options = {
   ca: [fs.readFileSync('./tlsCa/ryans-csr.pem')]
 };
 
-
-
 const server = tls.createServer(options, (socket) => {
   console.log('server connected',
     socket.authorized ? 'authorized' : 'unauthorized');
   // socket.setEncoding('utf8');
   console.log(socket);
   const buffer = schema.encodeDemo({ x: 1, y: 3.13 });
-
 
   socket.on('data', (message: Buffer | string) => {
 
@@ -38,10 +32,10 @@ const server = tls.createServer(options, (socket) => {
   socket.pipe(socket);
 });
 
+server.on('end', () => { });
 
-server.on('end', () => {
-
-});
 server.listen(8000, () => {
   console.log('server bound');
 });
+
+
