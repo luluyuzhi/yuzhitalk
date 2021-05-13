@@ -1,6 +1,9 @@
 import pbjs from 'pbjs';
 import tls from 'tls';
 import fs from 'fs';
+import dapr from 'dapr-client';
+import { Dapr } from './grpc';
+
 
 const schema = pbjs.parseSchema(`
   message Demo {
@@ -8,6 +11,8 @@ const schema = pbjs.parseSchema(`
     optional float y = 2;
   }
 `).compile();
+
+
 
 const options = {
   key: fs.readFileSync('./tlsCa/ryans-key.pem'),
@@ -29,13 +34,38 @@ const server = tls.createServer(options, (socket) => {
       socket.end();
     }
 
+    if (typeof message === 'string') {
+
+      // error // only support buffer type
+    }
+
+    const save = new dapr.dapr_pb.SaveStateRequest();
+    save.setStoreName(Dapr.StateStoreName);
+    const state = new dapr.common_pb.StateItem();
+    state.setKey("order");
+    state.setValue(Buffer.from(JSON.stringify({ id: "curder", ip: "localhost", })));
+    save.addStates(state);
+
+    const ins = Dapr.Instance();
+
+    const savePromise = new Promise((resolve, reject) => {
+      ins.saveState(save, (err, state) => { err ? reject(err) : resolve(void 0); } );
+    });
+
+    savePromise.catch((err) => { });
+    socket.write(buffer);
+    socket.pipe(socket);
   });
-  socket.write(buffer);
-  socket.pipe(socket);
 });
 
 server.on('end', () => { });
 
+server.listen(8000, () => {
+  console.log('server bound');
+});
+server.on('end', () => {
+
+});
 server.listen(8000, () => {
   console.log('server bound');
 });
