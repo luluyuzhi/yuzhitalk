@@ -38,7 +38,6 @@ export function
 
 export function
     TranslationBuffer2MiddleProtocol(translationBuffer: TranslationBuffer): IMiddleProtocol {
-
     const version = (new StringDecoder('ascii')).write(translationBuffer.slice(0, 13)) as EVersion;
     const PackageType = translationBuffer.slice(13, 14).readInt8();
 

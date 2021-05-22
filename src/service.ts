@@ -1,9 +1,9 @@
-import pbjs from 'pbjs';
+import * as pbjs from 'pbjs';
 import tls from 'tls';
 import fs from 'fs';
 import dapr from 'dapr-client';
 import { Dapr } from './grpc';
-
+import { StatusStore } from './statusStore';
 
 const schema = pbjs.parseSchema(`
   message Demo {
@@ -11,8 +11,6 @@ const schema = pbjs.parseSchema(`
     optional float y = 2;
   }
 `).compile();
-
-
 
 const options = {
   key: fs.readFileSync('./tlsCa/ryans-key.pem'),
@@ -26,46 +24,31 @@ const options = {
 const server = tls.createServer(options, (socket) => {
   console.log('server connected',
     socket.authorized ? 'authorized' : 'unauthorized');
-  const buffer = schema.encodeDemo({ x: 1, y: 3.13 });
-
-  socket.on('data', (message: Buffer) => {
+  
+  socket.on('data', (message: Buffer | String) => {
 
     if (message instanceof String) {
       socket.end();
     }
 
     if (typeof message === 'string') {
-
-      // error // only support buffer type
+      //error: only support buffer type
     }
 
-    const save = new dapr.dapr_pb.SaveStateRequest();
-    save.setStoreName(Dapr.StateStoreName);
-    const state = new dapr.common_pb.StateItem();
-    state.setKey("order");
-    state.setValue(Buffer.from(JSON.stringify({ id: "curder", ip: "localhost", })));
-    save.addStates(state);
-
     const ins = Dapr.Instance();
+    const status = StatusStore(Dapr.StateStoreName, "order", { id: "curder", ip: "localhost", });
+    ins.saveState(status, (err, state) => {  } );
 
-    const savePromise = new Promise((resolve, reject) => {
-      ins.saveState(save, (err, state) => { err ? reject(err) : resolve(void 0); } );
-    });
-
-    savePromise.catch((err) => { });
+    const buffer = schema.encodeDemo({ x: 1, y: 3.13 });
     socket.write(buffer);
+
+    // whats mean
     socket.pipe(socket);
   });
 });
 
 server.on('end', () => { });
 
-server.listen(8000, () => {
-  console.log('server bound');
-});
-server.on('end', () => {
-
-});
 server.listen(8000, () => {
   console.log('server bound');
 });

@@ -1,6 +1,7 @@
 {
     "recommendations": [
         "tabnine.tabnine-vscode",
-        "bierner.jsdoc-markdown-highlighting"
+        "bierner.jsdoc-markdown-highlighting",
+        "zxh404.vscode-proto3"
     ]
 }

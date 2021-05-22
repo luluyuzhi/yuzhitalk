@@ -1,0 +1,36 @@
+message StransfromText{
+    required string statustransfrom =1; /* /18630977999/17695926999 */
+    required string contents = 2; 
+    required int64 timestamp = 3;
+}
+
+message AuthToken {
+    required string token =1;
+}
+
+message AuthUser {
+    enum EAuthType {
+        option allow_alias = true;
+        PHONE =0;
+        EMAIL =1;
+        ACCOUNT =2;
+    }
+    required string authUserAccount =1;
+    required string secretKey =2;
+    required EAuthType authType = 3 [default = phone];
+    optional string other = 4;
+}
+
+message Ack {
+    required string ack = 1;
+}
+
+message Notify {
+    required string messageId = 1;
+}
+
+
+message yuzhitalkproto {
+    required string messageType =1;
+
+}

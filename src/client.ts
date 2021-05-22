@@ -1,6 +1,6 @@
 import tls from 'tls';
 import fs from 'fs';
-import pbjs from 'pbjs';
+import * as pbjs from 'pbjs';
 
 const schema = pbjs.parseSchema(`
   message Demo {
@@ -23,6 +23,8 @@ const options = {
 const socket = tls.connect(8000, options, () => {
     console.log('client connected',
         socket.authorized ? 'authorized' : 'unauthorized');
+
+    socket.write(Buffer.from("123"));
     process.stdin.pipe(socket);
     process.stdin.resume();
 });
