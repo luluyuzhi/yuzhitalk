@@ -1,9 +1,3 @@
-message StransfromText{
-    required string statustransfrom =1; /* /18630977999/17695926999 */
-    required string contents = 2; 
-    required int64 timestamp = 3;
-}
-
 message AuthToken {
     required string token =1;
 }
@@ -17,20 +11,104 @@ message AuthUser {
     }
     required string authUserAccount =1;
     required string secretKey =2;
-    required EAuthType authType = 3 [default = phone];
+    required EAuthType authType = 3 [default = PHONE];
     optional string other = 4;
 }
 
+enum MessageType {
+    Text = 0;
+    Voice = 1;
+    Image = 2;
+    Video = 3; 
+    Position = 4;
+    File = 5;
+    Notify = 10;
+    Custom = 100;
+}
+
+message TransfromText { // 0
+    required string contents = 1; 
+}
+
+message TransfromVoice { // 1
+    required int64 duration=1;
+    required string md5=2;
+    required string url=3;
+    required string ext=4;
+    required int64 size=5;
+}
+
+message TransfromVideo { // 2
+    required int64 duration=1;
+    required string md5 = 2;
+    required string url = 3;
+    required string ext =4;
+    required int64 w =5;
+    required int64 h =6;
+    required int64 size =7;
+}
+
+
+message TransfromImage { // 2
+    required string name=1;
+    required string md5 = 2;
+    required string url = 3;
+    required string ext =4;
+    required int64 w =5;
+    required int64 h =6;
+    required int64 size =7;
+}
+
+message TransfromFile { // 5
+    required string name=1;
+    required string md5 = 2;
+    required string url = 3;
+    required string ext =4;
+    required int64 size =5;
+}
+
+message TransfromNotify { // 10
+    required string message=1;
+    map<string, string> option = 5;
+}
+
+message TransfromPosition {
+    required string title = 1;
+    required int64 lng = 1;         // 经度
+    required int64 lat = 1;         // 纬度
+}
 message Ack {
     required string ack = 1;
+    required int64 timestamp =2;
+    map<string, int64> userId =3;
+    repeated string invaildId =4;
+}
+
+message recallMessage {
+    required string statustransfrom =1;
+    required string deleteMsgid = 2;
+    required int64 timetag = 3;
+    enum RecallType {
+        POiNT2POiNT =0;
+        GROUP =1;
+    }
+    required RecallType type = 4 [default POiNT2POiNT];
+    optional int32 ignoreTime = 5;
 }
 
 message Notify {
     required string messageId = 1;
 }
 
+  
 
 message yuzhitalkproto {
-    required string messageType =1;
-
+    required MessageType messageType =1 [default = Text];
+    required int64 timestamp =2;
+    required string statustransfrom =3; /* /18630977999/17695926999 */
+    oneof body {
+        TransfromText transfromtext =4; 
+    }
+    map<string, string> option = 5;
+    map<string, string> server =6;
 }

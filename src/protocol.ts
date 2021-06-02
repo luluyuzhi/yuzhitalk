@@ -16,13 +16,11 @@ export enum EPackageType {
 }
 
 export interface IProtocolHeader {
-
     version: EVersion;
     PackageType: EPackageType;
 }
 
 export interface IMiddleProtocol extends IProtocolHeader {
-
     package: Buffer;
 }
 
