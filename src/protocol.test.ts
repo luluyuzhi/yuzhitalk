@@ -8,8 +8,7 @@ describe('protocol', () => {
     const buf = Buffer.alloc(1);
     buf.writeUInt8(64);
     const targe = Buffer.concat([Buffer.from('yuzhitps0.0.1', 'ascii'), buf, Buffer.from('yimin here')])
-
-
+    
     const source = {
         version: EVersion.yuzhitps,
         PackageType: EPackageType.auth,

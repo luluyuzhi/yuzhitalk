@@ -1,5 +1,5 @@
-import dapr from 'dapr-client';
-import grpc from "grpc";
+import * as dapr from 'dapr-client';
+import { credentials } from "grpc";
 
 export class Dapr {
 
@@ -11,7 +11,7 @@ export class Dapr {
             const daprGrpcPort = process.env.DAPR_GRPC_PORT || 50001;
 
             this.instance = new dapr.dapr_grpc.DaprClient(
-                `localhost:${daprGrpcPort}`, grpc.credentials.createInsecure());
+                `localhost:${daprGrpcPort}`, credentials.createInsecure());
         }
         return this.instance;
     }

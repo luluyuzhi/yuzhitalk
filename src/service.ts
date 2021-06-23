@@ -1,9 +1,11 @@
 import * as pbjs from 'pbjs';
-import tls from 'tls';
-import fs from 'fs';
-import dapr from 'dapr-client';
-import { Dapr } from './grpc';
+import * as fs from 'fs';
+import { Dapr } from './serverGrpc';
 import { StatusStore } from './statusStore';
+import { decodeyuzhitalkproto } from './normal'
+import { TLSSocket, createServer } from 'tls';
+
+
 
 const schema = pbjs.parseSchema(`
   message Demo {
@@ -21,23 +23,24 @@ const options = {
   ca: [fs.readFileSync('./tlsCa/ryans-csr.pem')]
 };
 
-const server = tls.createServer(options, (socket) => {
+const server = createServer(options, (socket: TLSSocket) => {
   console.log('server connected',
     socket.authorized ? 'authorized' : 'unauthorized');
-  
-  socket.on('data', (message: Buffer | String) => {
 
-    if (message instanceof String) {
-      socket.end();
-    }
+  socket.on('data', (message: Buffer | string | String) => {
 
-    if (typeof message === 'string') {
+
+    if (typeof message === 'string' || message instanceof String) {
       //error: only support buffer type
+      socket.end();
+      return;
     }
 
-    const ins = Dapr.Instance();
+    const proto = decodeyuzhitalkproto(new Uint8Array(message.buffer));
+    console.log(proto);
+    const ins = Dapr.Instance()
     const status = StatusStore(Dapr.StateStoreName, "order", { id: "curder", ip: "localhost", });
-    ins.saveState(status, (err, state) => {  } );
+    ins.saveState(status, (err: any, state: any) => { });
 
     const buffer = schema.encodeDemo({ x: 1, y: 3.13 });
     socket.write(buffer);
