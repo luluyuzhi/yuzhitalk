@@ -6,10 +6,18 @@
     "scripts": {
         "test": "mocha out/*.test.js",
         "build": "tsc",
-        "start": "dapr run --app-id=service-chat --dapr-http-port=3501 --app-port=8000 -- ts-node src/service.ts",
+        "start": "dapr run --app-id=service-chat --dapr-http-port=3501 --app-port=8080 -- ts-node --project src/tsconfig.json  -r tsconfig-paths/register   src/main.ts",
+        "server": "ts-node --project src/tsconfig.json  -r tsconfig-paths/register   src/main.ts",
         "client": "ts-node src/client.ts"
     },
-    "author": "",
+    "config": {
+        "port": "8080"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/luluyuzhi/yuzhitalk"
+    },
+    "author": "yimin",
     "license": "ISC",
     "dependencies": {
         "dapr": "0.0.1",

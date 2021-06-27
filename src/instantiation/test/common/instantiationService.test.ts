@@ -52,6 +52,8 @@ interface IDependentService {
 	name: string;
 }
 
+
+
 class DependentService implements IDependentService {
 	declare readonly _serviceBrand: undefined;
 	constructor(@IService1 service: IService1) {
