@@ -7,7 +7,7 @@ export interface IServer {
     Start(): void;
 }
 
-// 在 typescript 中也有一个 NodeFactory createDecorator
+// 在 typescript 中也有一个 NodeFactory: createDecorator
 export const IServer = createDecorator<IServer>('mainService');
 
 export class NetService implements IServer {
@@ -24,7 +24,8 @@ export class NetService implements IServer {
                     socket.end();
                     return;
                 }
-                protocol.handleProtocol(message);
+                const body = protocol.handleProtocol(message);
+                
                 socket.write(message);
                 // whats mean？
                 socket.pipe(socket);
@@ -39,8 +40,9 @@ export class NetService implements IServer {
     }
 
     Start(): void {
-        this.server.listen(process.env.npm_package_config_port, () => {
-            console.log("server bound");
+        /* process.env["npm_package_config_port"] as unknown as number */
+        this.server.listen(8080, () => {
+            console.log("server bound", process.env["npm_package_config_port"]);
         });
     }
 }

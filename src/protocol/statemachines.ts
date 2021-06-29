@@ -1,6 +1,7 @@
 import { IDstory, IUnique } from './common/selfdictionary';
 import { yuzhitalkproto, MessageType } from './normal';
-import { SelfDictionary } from './common/selfdictionary'
+import { SelfDictionary } from './common/selfdictionary';
+
 enum MessageStatus {
     SendMsgRequest,
     SendMsgNotify,

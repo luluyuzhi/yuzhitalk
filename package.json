@@ -11,7 +11,7 @@
         "client": "ts-node src/client.ts"
     },
     "config": {
-        "port": "8080"
+        "port": 8080
     },
     "repository": {
         "type": "git",
@@ -22,6 +22,7 @@
     "dependencies": {
         "dapr": "0.0.1",
         "dapr-client": "^0.12.0",
+        "log4js": "^6.3.0",
         "pbjs": "0.0.14",
         "protobufjs": "^6.10.2",
         "typescript": "^4.3.4"

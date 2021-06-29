@@ -380,158 +380,6 @@ function _decodeTransfromVoice(bb: ByteBuffer): TransfromVoice {
   return message;
 }
 
-export interface TransfromVideo {
-  duration: Long;
-  md5: string;
-  url: string;
-  ext: string;
-  w: Long;
-  h: Long;
-  size: Long;
-}
-
-export function encodeTransfromVideo(message: TransfromVideo): Uint8Array {
-  let bb = popByteBuffer();
-  _encodeTransfromVideo(message, bb);
-  return toUint8Array(bb);
-}
-
-function _encodeTransfromVideo(message: TransfromVideo, bb: ByteBuffer): void {
-  // required int64 duration = 1;
-  let $duration = message.duration;
-  if ($duration !== undefined) {
-    writeVarint32(bb, 8);
-    writeVarint64(bb, $duration);
-  }
-
-  // required string md5 = 2;
-  let $md5 = message.md5;
-  if ($md5 !== undefined) {
-    writeVarint32(bb, 18);
-    writeString(bb, $md5);
-  }
-
-  // required string url = 3;
-  let $url = message.url;
-  if ($url !== undefined) {
-    writeVarint32(bb, 26);
-    writeString(bb, $url);
-  }
-
-  // required string ext = 4;
-  let $ext = message.ext;
-  if ($ext !== undefined) {
-    writeVarint32(bb, 34);
-    writeString(bb, $ext);
-  }
-
-  // required int64 w = 5;
-  let $w = message.w;
-  if ($w !== undefined) {
-    writeVarint32(bb, 40);
-    writeVarint64(bb, $w);
-  }
-
-  // required int64 h = 6;
-  let $h = message.h;
-  if ($h !== undefined) {
-    writeVarint32(bb, 48);
-    writeVarint64(bb, $h);
-  }
-
-  // required int64 size = 7;
-  let $size = message.size;
-  if ($size !== undefined) {
-    writeVarint32(bb, 56);
-    writeVarint64(bb, $size);
-  }
-}
-
-export function decodeTransfromVideo(binary: Uint8Array): TransfromVideo {
-  return _decodeTransfromVideo(wrapByteBuffer(binary));
-}
-
-function _decodeTransfromVideo(bb: ByteBuffer): TransfromVideo {
-  let message: TransfromVideo = {} as any;
-
-  end_of_message: while (!isAtEnd(bb)) {
-    let tag = readVarint32(bb);
-
-    switch (tag >>> 3) {
-      case 0:
-        break end_of_message;
-
-      // required int64 duration = 1;
-      case 1: {
-        message.duration = readVarint64(bb, /* unsigned */ false);
-        break;
-      }
-
-      // required string md5 = 2;
-      case 2: {
-        message.md5 = readString(bb, readVarint32(bb));
-        break;
-      }
-
-      // required string url = 3;
-      case 3: {
-        message.url = readString(bb, readVarint32(bb));
-        break;
-      }
-
-      // required string ext = 4;
-      case 4: {
-        message.ext = readString(bb, readVarint32(bb));
-        break;
-      }
-
-      // required int64 w = 5;
-      case 5: {
-        message.w = readVarint64(bb, /* unsigned */ false);
-        break;
-      }
-
-      // required int64 h = 6;
-      case 6: {
-        message.h = readVarint64(bb, /* unsigned */ false);
-        break;
-      }
-
-      // required int64 size = 7;
-      case 7: {
-        message.size = readVarint64(bb, /* unsigned */ false);
-        break;
-      }
-
-      default:
-        skipUnknownField(bb, tag & 7);
-    }
-  }
-
-  if (message.duration === undefined)
-    throw new Error("Missing required field: duration");
-
-  if (message.md5 === undefined)
-    throw new Error("Missing required field: md5");
-
-  if (message.url === undefined)
-    throw new Error("Missing required field: url");
-
-  if (message.ext === undefined)
-    throw new Error("Missing required field: ext");
-
-  if (message.w === undefined)
-    throw new Error("Missing required field: w");
-
-  if (message.h === undefined)
-    throw new Error("Missing required field: h");
-
-  if (message.size === undefined)
-    throw new Error("Missing required field: size");
-
-  return message;
-}
-
 export interface TransfromImage {
   name: string;
   md5: string;
@@ -684,6 +532,242 @@ function _decodeTransfromImage(bb: ByteBuffer): TransfromImage {
   return message;
 }
 
+export interface TransfromVideo {
+  duration: Long;
+  md5: string;
+  url: string;
+  ext: string;
+  w: Long;
+  h: Long;
+  size: Long;
+}
+
+export function encodeTransfromVideo(message: TransfromVideo): Uint8Array {
+  let bb = popByteBuffer();
+  _encodeTransfromVideo(message, bb);
+  return toUint8Array(bb);
+}
+
+function _encodeTransfromVideo(message: TransfromVideo, bb: ByteBuffer): void {
+  // required int64 duration = 1;
+  let $duration = message.duration;
+  if ($duration !== undefined) {
+    writeVarint32(bb, 8);
+    writeVarint64(bb, $duration);
+  }
+
+  // required string md5 = 2;
+  let $md5 = message.md5;
+  if ($md5 !== undefined) {
+    writeVarint32(bb, 18);
+    writeString(bb, $md5);
+  }
+
+  // required string url = 3;
+  let $url = message.url;
+  if ($url !== undefined) {
+    writeVarint32(bb, 26);
+    writeString(bb, $url);
+  }
+
+  // required string ext = 4;
+  let $ext = message.ext;
+  if ($ext !== undefined) {
+    writeVarint32(bb, 34);
+    writeString(bb, $ext);
+  }
+
+  // required int64 w = 5;
+  let $w = message.w;
+  if ($w !== undefined) {
+    writeVarint32(bb, 40);
+    writeVarint64(bb, $w);
+  }
+
+  // required int64 h = 6;
+  let $h = message.h;
+  if ($h !== undefined) {
+    writeVarint32(bb, 48);
+    writeVarint64(bb, $h);
+  }
+
+  // required int64 size = 7;
+  let $size = message.size;
+  if ($size !== undefined) {
+    writeVarint32(bb, 56);
+    writeVarint64(bb, $size);
+  }
+}
+
+export function decodeTransfromVideo(binary: Uint8Array): TransfromVideo {
+  return _decodeTransfromVideo(wrapByteBuffer(binary));
+}
+
+function _decodeTransfromVideo(bb: ByteBuffer): TransfromVideo {
+  let message: TransfromVideo = {} as any;
+
+  end_of_message: while (!isAtEnd(bb)) {
+    let tag = readVarint32(bb);
+
+    switch (tag >>> 3) {
+      case 0:
+        break end_of_message;
+
+      // required int64 duration = 1;
+      case 1: {
+        message.duration = readVarint64(bb, /* unsigned */ false);
+        break;
+      }
+
+      // required string md5 = 2;
+      case 2: {
+        message.md5 = readString(bb, readVarint32(bb));
+        break;
+      }
+
+      // required string url = 3;
+      case 3: {
+        message.url = readString(bb, readVarint32(bb));
+        break;
+      }
+
+      // required string ext = 4;
+      case 4: {
+        message.ext = readString(bb, readVarint32(bb));
+        break;
+      }
+
+      // required int64 w = 5;
+      case 5: {
+        message.w = readVarint64(bb, /* unsigned */ false);
+        break;
+      }
+
+      // required int64 h = 6;
+      case 6: {
+        message.h = readVarint64(bb, /* unsigned */ false);
+        break;
+      }
+
+      // required int64 size = 7;
+      case 7: {
+        message.size = readVarint64(bb, /* unsigned */ false);
+        break;
+      }
+
+      default:
+        skipUnknownField(bb, tag & 7);
+    }
+  }
+
+  if (message.duration === undefined)
+    throw new Error("Missing required field: duration");
+
+  if (message.md5 === undefined)
+    throw new Error("Missing required field: md5");
+
+  if (message.url === undefined)
+    throw new Error("Missing required field: url");
+
+  if (message.ext === undefined)
+    throw new Error("Missing required field: ext");
+
+  if (message.w === undefined)
+    throw new Error("Missing required field: w");
+
+  if (message.h === undefined)
+    throw new Error("Missing required field: h");
+
+  if (message.size === undefined)
+    throw new Error("Missing required field: size");
+
+  return message;
+}
+
+export interface TransfromPosition {
+  title: string;
+  lng: Long;
+  lat: Long;
+}
+
+export function encodeTransfromPosition(message: TransfromPosition): Uint8Array {
+  let bb = popByteBuffer();
+  _encodeTransfromPosition(message, bb);
+  return toUint8Array(bb);
+}
+
+function _encodeTransfromPosition(message: TransfromPosition, bb: ByteBuffer): void {
+  // required string title = 1;
+  let $title = message.title;
+  if ($title !== undefined) {
+    writeVarint32(bb, 10);
+    writeString(bb, $title);
+  }
+
+  // required int64 lng = 1;
+  let $lng = message.lng;
+  if ($lng !== undefined) {
+    writeVarint32(bb, 8);
+    writeVarint64(bb, $lng);
+  }
+
+  // required int64 lat = 1;
+  let $lat = message.lat;
+  if ($lat !== undefined) {
+    writeVarint32(bb, 8);
+    writeVarint64(bb, $lat);
+  }
+}
+
+export function decodeTransfromPosition(binary: Uint8Array): TransfromPosition {
+  return _decodeTransfromPosition(wrapByteBuffer(binary));
+}
+
+function _decodeTransfromPosition(bb: ByteBuffer): TransfromPosition {
+  let message: TransfromPosition = {} as any;
+
+  end_of_message: while (!isAtEnd(bb)) {
+    let tag = readVarint32(bb);
+
+    switch (tag >>> 3) {
+      case 0:
+        break end_of_message;
+
+      // required string title = 1;
+      case 1: {
+        message.title = readString(bb, readVarint32(bb));
+        break;
+      }
+
+      // required int64 lng = 1;
+      case 1: {
+        message.lng = readVarint64(bb, /* unsigned */ false);
+        break;
+      }
+
+      // required int64 lat = 1;
+      case 1: {
+        message.lat = readVarint64(bb, /* unsigned */ false);
+        break;
+      }
+
+      default:
+        skipUnknownField(bb, tag & 7);
+    }
+  }
+
+  if (message.title === undefined)
+    throw new Error("Missing required field: title");
+
+  if (message.lng === undefined)
+    throw new Error("Missing required field: lng");
+
+  if (message.lat === undefined)
+    throw new Error("Missing required field: lat");
+
+  return message;
+}
+
 export interface TransfromFile {
   name: string;
   md5: string;
@@ -802,6 +886,56 @@ function _decodeTransfromFile(bb: ByteBuffer): TransfromFile {
   return message;
 }
 
+export interface Notify {
+  messageId: string;
+}
+
+export function encodeNotify(message: Notify): Uint8Array {
+  let bb = popByteBuffer();
+  _encodeNotify(message, bb);
+  return toUint8Array(bb);
+}
+
+function _encodeNotify(message: Notify, bb: ByteBuffer): void {
+  // required string messageId = 1;
+  let $messageId = message.messageId;
+  if ($messageId !== undefined) {
+    writeVarint32(bb, 10);
+    writeString(bb, $messageId);
+  }
+}
+
+export function decodeNotify(binary: Uint8Array): Notify {
+  return _decodeNotify(wrapByteBuffer(binary));
+}
+
+function _decodeNotify(bb: ByteBuffer): Notify {
+  let message: Notify = {} as any;
+
+  end_of_message: while (!isAtEnd(bb)) {
+    let tag = readVarint32(bb);
+
+    switch (tag >>> 3) {
+      case 0:
+        break end_of_message;
+
+      // required string messageId = 1;
+      case 1: {
+        message.messageId = readString(bb, readVarint32(bb));
+        break;
+      }
+
+      default:
+        skipUnknownField(bb, tag & 7);
+    }
+  }
+
+  if (message.messageId === undefined)
+    throw new Error("Missing required field: messageId");
+
+  return message;
+}
+
 export interface TransfromNotify {
   message: string;
   option?: { [key: string]: string };
@@ -896,90 +1030,6 @@ function _decodeTransfromNotify(bb: ByteBuffer): TransfromNotify {
 
   if (message.message === undefined)
     throw new Error("Missing required field: message");
-
-  return message;
-}
-
-export interface TransfromPosition {
-  title: string;
-  lng: Long;
-  lat: Long;
-}
-
-export function encodeTransfromPosition(message: TransfromPosition): Uint8Array {
-  let bb = popByteBuffer();
-  _encodeTransfromPosition(message, bb);
-  return toUint8Array(bb);
-}
-
-function _encodeTransfromPosition(message: TransfromPosition, bb: ByteBuffer): void {
-  // required string title = 1;
-  let $title = message.title;
-  if ($title !== undefined) {
-    writeVarint32(bb, 10);
-    writeString(bb, $title);
-  }
-
-  // required int64 lng = 1;
-  let $lng = message.lng;
-  if ($lng !== undefined) {
-    writeVarint32(bb, 8);
-    writeVarint64(bb, $lng);
-  }
-
-  // required int64 lat = 1;
-  let $lat = message.lat;
-  if ($lat !== undefined) {
-    writeVarint32(bb, 8);
-    writeVarint64(bb, $lat);
-  }
-}
-
-export function decodeTransfromPosition(binary: Uint8Array): TransfromPosition {
-  return _decodeTransfromPosition(wrapByteBuffer(binary));
-}
-
-function _decodeTransfromPosition(bb: ByteBuffer): TransfromPosition {
-  let message: TransfromPosition = {} as any;
-
-  end_of_message: while (!isAtEnd(bb)) {
-    let tag = readVarint32(bb);
-
-    switch (tag >>> 3) {
-      case 0:
-        break end_of_message;
-
-      // required string title = 1;
-      case 1: {
-        message.title = readString(bb, readVarint32(bb));
-        break;
-      }
-
-      // required int64 lng = 1;
-      case 1: {
-        message.lng = readVarint64(bb, /* unsigned */ false);
-        break;
-      }
-
-      // required int64 lat = 1;
-      case 1: {
-        message.lat = readVarint64(bb, /* unsigned */ false);
-        break;
-      }
-
-      default:
-        skipUnknownField(bb, tag & 7);
-    }
-  }
-
-  if (message.title === undefined)
-    throw new Error("Missing required field: title");
-
-  if (message.lng === undefined)
-    throw new Error("Missing required field: lng");
-
-  if (message.lat === undefined)
-    throw new Error("Missing required field: lat");
 
   return message;
 }
@@ -1231,61 +1281,17 @@ function _decoderecallMessage(bb: ByteBuffer): recallMessage {
   return message;
 }
 
-export interface Notify {
-  messageId: string;
-}
-
-export function encodeNotify(message: Notify): Uint8Array {
-  let bb = popByteBuffer();
-  _encodeNotify(message, bb);
-  return toUint8Array(bb);
-}
-
-function _encodeNotify(message: Notify, bb: ByteBuffer): void {
-  // required string messageId = 1;
-  let $messageId = message.messageId;
-  if ($messageId !== undefined) {
-    writeVarint32(bb, 10);
-    writeString(bb, $messageId);
-  }
-}
-
-export function decodeNotify(binary: Uint8Array): Notify {
-  return _decodeNotify(wrapByteBuffer(binary));
-}
-
-function _decodeNotify(bb: ByteBuffer): Notify {
-  let message: Notify = {} as any;
-
-  end_of_message: while (!isAtEnd(bb)) {
-    let tag = readVarint32(bb);
-
-    switch (tag >>> 3) {
-      case 0:
-        break end_of_message;
-
-      // required string messageId = 1;
-      case 1: {
-        message.messageId = readString(bb, readVarint32(bb));
-        break;
-      }
-
-      default:
-        skipUnknownField(bb, tag & 7);
-    }
-  }
-
-  if (message.messageId === undefined)
-    throw new Error("Missing required field: messageId");
-
-  return message;
-}
-
 export interface yuzhitalkproto {
   messageType: MessageType;
   timestamp: Long;
   statustransfrom: string;
   transfromtext?: TransfromText;
+  transfromVoice?: TransfromVoice;
+  transfromImage?: TransfromImage;
+  transfromVideo?: TransfromVideo;
+  transfromPosition?: TransfromPosition;
+  transfromFile?: TransfromFile;
+  notify?: Notify;
   option?: { [key: string]: string };
   server?: { [key: string]: string };
 }
@@ -1329,7 +1335,73 @@ function _encodeyuzhitalkproto(message: yuzhitalkproto, bb: ByteBuffer): void {
     pushByteBuffer(nested);
   }
 
-  // optional map<string, string> option = 5;
+  // optional TransfromVoice transfromVoice = 5;
+  let $transfromVoice = message.transfromVoice;
+  if ($transfromVoice !== undefined) {
+    writeVarint32(bb, 42);
+    let nested = popByteBuffer();
+    _encodeTransfromVoice($transfromVoice, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+
+  // optional TransfromImage transfromImage = 6;
+  let $transfromImage = message.transfromImage;
+  if ($transfromImage !== undefined) {
+    writeVarint32(bb, 50);
+    let nested = popByteBuffer();
+    _encodeTransfromImage($transfromImage, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+
+  // optional TransfromVideo transfromVideo = 7;
+  let $transfromVideo = message.transfromVideo;
+  if ($transfromVideo !== undefined) {
+    writeVarint32(bb, 58);
+    let nested = popByteBuffer();
+    _encodeTransfromVideo($transfromVideo, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+
+  // optional TransfromPosition transfromPosition = 8;
+  let $transfromPosition = message.transfromPosition;
+  if ($transfromPosition !== undefined) {
+    writeVarint32(bb, 66);
+    let nested = popByteBuffer();
+    _encodeTransfromPosition($transfromPosition, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+
+  // optional TransfromFile transfromFile = 9;
+  let $transfromFile = message.transfromFile;
+  if ($transfromFile !== undefined) {
+    writeVarint32(bb, 74);
+    let nested = popByteBuffer();
+    _encodeTransfromFile($transfromFile, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+
+  // optional Notify notify = 10;
+  let $notify = message.notify;
+  if ($notify !== undefined) {
+    writeVarint32(bb, 82);
+    let nested = popByteBuffer();
+    _encodeNotify($notify, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+
+  // optional map<string, string> option = 99;
   let map$option = message.option;
   if (map$option !== undefined) {
     for (let key in map$option) {
@@ -1339,14 +1411,14 @@ function _encodeyuzhitalkproto(message: yuzhitalkproto, bb: ByteBuffer): void {
       writeString(nested, key);
       writeVarint32(nested, 18);
       writeString(nested, value);
-      writeVarint32(bb, 42);
+      writeVarint32(bb, 794);
       writeVarint32(bb, nested.offset);
       writeByteBuffer(bb, nested);
       pushByteBuffer(nested);
     }
   }
 
-  // optional map<string, string> server = 6;
+  // optional map<string, string> server = 100;
   let map$server = message.server;
   if (map$server !== undefined) {
     for (let key in map$server) {
@@ -1356,7 +1428,7 @@ function _encodeyuzhitalkproto(message: yuzhitalkproto, bb: ByteBuffer): void {
       writeString(nested, key);
       writeVarint32(nested, 18);
       writeString(nested, value);
-      writeVarint32(bb, 50);
+      writeVarint32(bb, 802);
       writeVarint32(bb, nested.offset);
       writeByteBuffer(bb, nested);
       pushByteBuffer(nested);
@@ -1404,8 +1476,56 @@ function _decodeyuzhitalkproto(bb: ByteBuffer): yuzhitalkproto {
         break;
       }
 
-      // optional map<string, string> option = 5;
+      // optional TransfromVoice transfromVoice = 5;
       case 5: {
+        let limit = pushTemporaryLength(bb);
+        message.transfromVoice = _decodeTransfromVoice(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      // optional TransfromImage transfromImage = 6;
+      case 6: {
+        let limit = pushTemporaryLength(bb);
+        message.transfromImage = _decodeTransfromImage(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      // optional TransfromVideo transfromVideo = 7;
+      case 7: {
+        let limit = pushTemporaryLength(bb);
+        message.transfromVideo = _decodeTransfromVideo(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      // optional TransfromPosition transfromPosition = 8;
+      case 8: {
+        let limit = pushTemporaryLength(bb);
+        message.transfromPosition = _decodeTransfromPosition(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      // optional TransfromFile transfromFile = 9;
+      case 9: {
+        let limit = pushTemporaryLength(bb);
+        message.transfromFile = _decodeTransfromFile(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      // optional Notify notify = 10;
+      case 10: {
+        let limit = pushTemporaryLength(bb);
+        message.notify = _decodeNotify(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      // optional map<string, string> option = 99;
+      case 99: {
         let values = message.option || (message.option = {});
         let outerLimit = pushTemporaryLength(bb);
         let key: string | undefined;
@@ -1434,8 +1554,8 @@ function _decodeyuzhitalkproto(bb: ByteBuffer): yuzhitalkproto {
         break;
       }
 
-      // optional map<string, string> server = 6;
-      case 6: {
+      // optional map<string, string> server = 100;
+      case 100: {
         let values = message.server || (message.server = {});
         let outerLimit = pushTemporaryLength(bb);
         let key: string | undefined;

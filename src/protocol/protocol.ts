@@ -6,11 +6,11 @@ import {
 
 export interface IProtocolHock {
     readonly _serviceBrand: undefined;
-    DecodeProto(yuzhitalkProto: YuzhitalkProto): IProtocolHock;
+    DecodeProto(yuzhitalkProto: YuzhitalkProto): YuzhitalkProto;
     HandleTextMessage(transfromtext?: TransfromText): IProtocolHock;
     HandleVoiceMessage(transfromvoice?: TransfromVoice): IProtocolHock;
     HandleImageMessage(transfromimage?: TransfromImage): IProtocolHock;
-    HandleVideoMessage(transfromvideo?: TransfromVideo): IProtocol;
+    HandleVideoMessage(transfromvideo?: TransfromVideo): IProtocolHock;
     HandlePositionMessage(transfromposition?: TransfromPosition): IProtocolHock;
     HandleFileMessage(transfromfile?: TransfromFile): IProtocolHock;
     HandleNotifyMessage(transfromnotify?: TransfromNotify): IProtocolHock;
@@ -18,8 +18,8 @@ export interface IProtocolHock {
 export const IProtocolHock = createDecorator<IProtocolHock>('IProtocolHock');
 
 export class ProtocolHockServer implements IProtocolHock {
-    DecodeProto(yuzhitalkProto: YuzhitalkProto): IProtocolHock {
-        throw new Error('Method not implemented.');
+    DecodeProto(yuzhitalkProto: YuzhitalkProto): YuzhitalkProto {
+        return yuzhitalkProto;
     }
     HandleTextMessage(transfromtext?: TransfromText): IProtocolHock {
         if (transfromtext === undefined) {
@@ -29,30 +29,54 @@ export class ProtocolHockServer implements IProtocolHock {
         return this;
     }
     HandleVoiceMessage(transfromvoice?: TransfromVoice): IProtocolHock {
-        throw new Error('Method not implemented.');
+        if (transfromvoice === undefined) {
+            return this;
+        }
+
+        return this;
     }
     HandleImageMessage(transfromimage?: TransfromImage): IProtocolHock {
-        throw new Error('Method not implemented.');
+        if (transfromimage === undefined) {
+            return this;
+        }
+
+        return this;
     }
-    HandleVideoMessage(transfromvideo?: TransfromVideo): IProtocol {
-        throw new Error('Method not implemented.');
+    HandleVideoMessage(transfromvideo?: TransfromVideo): IProtocolHock {
+        if (transfromvideo === undefined) {
+            return this;
+        }
+
+        return this;
     }
     HandlePositionMessage(transfromposition?: TransfromPosition): IProtocolHock {
-        throw new Error('Method not implemented.');
+        if (transfromposition === undefined) {
+            return this;
+        }
+
+        return this;
     }
     HandleFileMessage(transfromfile?: TransfromFile): IProtocolHock {
-        throw new Error('Method not implemented.');
+        if (transfromfile === undefined) {
+            return this;
+        }
+
+        return this;
     }
     HandleNotifyMessage(transfromnotify?: TransfromNotify): IProtocolHock {
-        throw new Error('Method not implemented.');
-    }
-    declare readonly _serviceBrand: undefined;
+        if (transfromnotify === undefined) {
+            return this;
+        }
 
+        return this;
+    }
+
+    declare readonly _serviceBrand: undefined;
 }
 
 export interface IProtocol {
     readonly _serviceBrand: undefined;
-    handleProtocol(content: Buffer): void;
+    handleProtocol(content: Buffer): YuzhitalkProto | undefined;
 }
 
 export const IProtocol = createDecorator<IProtocol>('yuzhiProtocol');
@@ -61,9 +85,19 @@ export class Protocol implements IProtocol {
     declare _serviceBrand: undefined;
 
     constructor(@IProtocolHock private protocol: IProtocolHock) { }
-    public handleProtocol(content: Buffer): void {
-        const yuzhiProtocol: YuzhitalkProto = decodeyuzhitalkproto(content);
-        this.protocol.HandleTextMessage(yuzhiProtocol.transfromtext);
+    public handleProtocol(content: Buffer, /* 我想记录一些 socket 信息 */): YuzhitalkProto | undefined {
+        let yuzhiProtocol: YuzhitalkProto;
+        
+        try {
+            yuzhiProtocol = this.protocol.DecodeProto(decodeyuzhitalkproto(content));
+        } catch (e) {
+            return undefined;
+        }
+        this.protocol
+            .HandleTextMessage(yuzhiProtocol.transfromtext)
+            .HandleFileMessage(yuzhiProtocol.transfromFile);
+
+        return yuzhiProtocol;
     }
 }
 
