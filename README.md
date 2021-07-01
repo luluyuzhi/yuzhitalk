@@ -18,3 +18,7 @@
 [微信终端跨平台组件 Mars 系列 - 我们如约而至](https://github.com/WeMobileDev/article/blob/master/%E5%BE%AE%E4%BF%A1%E7%BB%88%E7%AB%AF%E8%B7%A8%E5%B9%B3%E5%8F%B0%E7%BB%84%E4%BB%B6%20Mars%20%E7%B3%BB%E5%88%97%20-%20%E6%88%91%E4%BB%AC%E5%A6%82%E7%BA%A6%E8%80%8C%E8%87%B3.md)
 
 [微信客户端怎样应对弱网络（GMCC会议PPT)](https://github.com/WeMobileDev/article/blob/master/%E5%BE%AE%E4%BF%A1%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%80%8E%E6%A0%B7%E5%BA%94%E5%AF%B9%E5%BC%B1%E7%BD%91%E7%BB%9C.pdf)
+
+## 运维篇
+
+[Experience Dapr - Run on K8s](https://rickhw.github.io/2021/03/20/DistributedSystems/Experience-Dapr-Run-on-K8s/)

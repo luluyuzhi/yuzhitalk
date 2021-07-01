@@ -1,8 +1,6 @@
-// import { configure, getLogger } from "log4js";
-// configure("./filename");
-// const logger = getLogger();
-// logger.level = "debug";
-// logger.debug("Some debug messages");
+import { configure, getLogger } from "log4js";
+const logger = getLogger();
+logger.level = "all";
 
 // configure({
 //     appenders: { cheese: { type: "file", filename: "cheese.log" } },
@@ -10,21 +8,8 @@
 // });
 
 
-function enumerable(value: boolean) {
-    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-        console.log(descriptor);
-    };
+// vs code 中 LogServer 并不是 对外的 一个核心接口
+export function DTraceLog(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    logger.trace(`DTraceLog - function: ${propertyKey}`);
 }
 
-class Mudo {
-
-    @enumerable(false)
-    cc() {
-        console.log(1);
-    }
-}
-
-
-let muduo = new Mudo;
-
-muduo.cc();

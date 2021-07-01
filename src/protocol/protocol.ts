@@ -3,6 +3,7 @@ import {
     yuzhitalkproto as YuzhitalkProto, MessageType, TransfromText, TransfromFile,
     TransfromImage, TransfromVoice, decodeyuzhitalkproto, TransfromNotify, TransfromPosition, TransfromVideo
 } from './normal';
+import { MessageStatusTransformer } from './statemachines';
 
 export interface IProtocolHock {
     readonly _serviceBrand: undefined;
@@ -86,8 +87,15 @@ export class Protocol implements IProtocol {
 
     constructor(@IProtocolHock private protocol: IProtocolHock) { }
     public handleProtocol(content: Buffer, /* 我想记录一些 socket 信息 */): YuzhitalkProto | undefined {
+
+        let yuzhiProtocol = this.decode(content);
+
+        let messageStatusTransformer: MessageStatusTransformer = new MessageStatusTransformer(yuzhiProtocol, 0);
+        return yuzhiProtocol;
+    }
+
+    private decode(content: Buffer) {
         let yuzhiProtocol: YuzhitalkProto;
-        
         try {
             yuzhiProtocol = this.protocol.DecodeProto(decodeyuzhitalkproto(content));
         } catch (e) {
@@ -96,7 +104,6 @@ export class Protocol implements IProtocol {
         this.protocol
             .HandleTextMessage(yuzhiProtocol.transfromtext)
             .HandleFileMessage(yuzhiProtocol.transfromFile);
-
         return yuzhiProtocol;
     }
 }

@@ -26,6 +26,7 @@ export class NetService implements IServer {
                 }
                 const body = protocol.handleProtocol(message);
                 
+
                 socket.write(message);
                 // whats mean？
                 socket.pipe(socket);

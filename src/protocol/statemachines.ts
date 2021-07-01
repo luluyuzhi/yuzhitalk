@@ -1,6 +1,9 @@
-import { IDstory, IUnique } from './common/selfdictionary';
+import { IUnique } from './common/selfdictionary';
 import { yuzhitalkproto, MessageType } from './normal';
 import { SelfDictionary } from './common/selfdictionary';
+import { IDisposable } from '../common/lifecycle';
+import { createDecorator } from 'yuzhi/instantiation/common/instantiation';
+import { IInstantiationService } from 'yuzhi/instantiation/common/instantiation';
 
 enum MessageStatus {
     SendMsgRequest,
@@ -16,7 +19,7 @@ interface IStatusImpl {
     Status: () => MessageStatus
 }
 
-interface IStatus extends IDstory, IStatusImpl { }
+interface IStatus extends IDisposable, IStatusImpl { }
 
 export class MessageStatusTransformer implements IUnique<number>, IStatusImpl {
     constructor(private content: yuzhitalkproto,
@@ -40,25 +43,23 @@ export class MessageStatusTransformer implements IUnique<number>, IStatusImpl {
     }
 }
 
-interface IDecodeStatus {
-    Decode(content: Buffer): any;
-}
-
-interface IProtocolCollocationServer {
+export interface IProtocolCollocationServer {
     handleSource(content: yuzhitalkproto): any;
 }
 
+export const IProtocolCollocationServer = createDecorator<IProtocolCollocationServer>('protocolCollocationServer');
+
 export class ProtocolCollocationServer implements IProtocolCollocationServer {
     private selfDictionary = new SelfDictionary();
-    constructor() {
-
-    }
+    constructor(
+        @IInstantiationService InstantiationService: IInstantiationService
+    ) { }
     handleSource(content: yuzhitalkproto) {
-        throw new Error('Method not implemented.');
-    }
-
-    push(status: IStatus) {
-
+        //1. 查表， 如果在的话就 继续处理
+        //2. 不在就加入
+        let messageStatusTransformer = new MessageStatusTransformer(content, 0);
+        let dispose = this.selfDictionary.set(messageStatusTransformer);
+        let stateMachines = new StateMachines({ ...dispose, Gen: messageStatusTransformer.Gen, Status: messageStatusTransformer.Status });
     }
 }
 
