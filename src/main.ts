@@ -2,7 +2,7 @@ import { InstantiationService } from 'yuzhi/instantiation/common/instantiationSe
 import { SyncDescriptor } from 'yuzhi/instantiation/common/descriptors';
 import { ServiceCollection } from 'yuzhi/instantiation/common/serviceCollection';
 import { IProtocol, Protocol, IProtocolHock, ProtocolHockServer } from 'yuzhi/protocol/protocol';
-import { IServer, NetService } from 'yuzhi/core/server';
+import { NetService } from 'yuzhi/core/server';
 import { IInstantiationService } from 'yuzhi/instantiation/common/instantiation';
 import { options } from 'yuzhi/option';
 import { IProtocolCollocationServer, ProtocolCollocationServer } from 'yuzhi/protocol/statemachines';
@@ -21,7 +21,6 @@ class CoreMain {
         instantiationService.invokeFunction((accessor) =>{
             instantiationService.createInstance(NetService, options).Start();
         });
-        
     }
 
     private createServices(): IInstantiationService {

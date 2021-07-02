@@ -2,7 +2,7 @@ import * as dapr from 'dapr-client';
 import { credentials } from "grpc";
 
 export class Dapr {
-
+    
     private static instance?: dapr.dapr_grpc.DaprClient;
     public static readonly StateStoreName = `statestore`;
     public static Instance(): dapr.dapr_grpc.DaprClient {
@@ -16,3 +16,5 @@ export class Dapr {
 
     private constructor() { }
 }
+
+

@@ -6,9 +6,7 @@ interface IUserService {
 }
 
 export class UserService {
-
     constructor(
-        /**/
     ) { }
 
 }

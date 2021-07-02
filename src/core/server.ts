@@ -13,7 +13,7 @@ export const IServer = createDecorator<IServer>('mainService');
 export class NetService implements IServer {
     declare readonly _serviceBrand: undefined;
 
-    private server!: Server;
+    private server: Server;
     public constructor(private options: unknown, @IProtocol protocol: IProtocol) {
         this.server = createServer(options, (socket: TLSSocket) => {
             console.log('server connected',
@@ -24,7 +24,7 @@ export class NetService implements IServer {
                     socket.end();
                     return;
                 }
-                const body = protocol.handleProtocol(message);
+                const body = protocol.handleProtocol(message, socket);
                 
 
                 socket.write(message);

@@ -1,9 +1,10 @@
+import { TLSSocket } from 'tls';
 import { createDecorator } from 'yuzhi/instantiation/common/instantiation';
 import {
     yuzhitalkproto as YuzhitalkProto, MessageType, TransfromText, TransfromFile,
-    TransfromImage, TransfromVoice, decodeyuzhitalkproto, TransfromNotify, TransfromPosition, TransfromVideo
+    TransfromImage, TransfromVoice, decodeyuzhitalkproto, TransfromNotify, TransfromPosition, TransfromVideo, yuzhitalkproto
 } from './normal';
-import { MessageStatusTransformer } from './statemachines';
+import { IProtocolCollocationServer, MessageStatusTransformer } from './statemachines';
 
 export interface IProtocolHock {
     readonly _serviceBrand: undefined;
@@ -77,7 +78,7 @@ export class ProtocolHockServer implements IProtocolHock {
 
 export interface IProtocol {
     readonly _serviceBrand: undefined;
-    handleProtocol(content: Buffer): YuzhitalkProto | undefined;
+    handleProtocol(content: Buffer, socket: TLSSocket): void;
 }
 
 export const IProtocol = createDecorator<IProtocol>('yuzhiProtocol');
@@ -85,16 +86,22 @@ export const IProtocol = createDecorator<IProtocol>('yuzhiProtocol');
 export class Protocol implements IProtocol {
     declare _serviceBrand: undefined;
 
-    constructor(@IProtocolHock private protocol: IProtocolHock) { }
-    public handleProtocol(content: Buffer, /* 我想记录一些 socket 信息 */): YuzhitalkProto | undefined {
+    constructor(
+        @IProtocolHock private protocol: IProtocolHock,
+        @IProtocolCollocationServer private collocationServer: IProtocolCollocationServer
+    ) { }
+    public handleProtocol(content: Buffer, socket: TLSSocket) {
 
         let yuzhiProtocol = this.decode(content);
-
+        if (!yuzhiProtocol) {
+            socket.write(Buffer.from("fail", 'ascii'));
+            return;
+        }
+        this.collocationServer.handleSource(yuzhiProtocol);
         let messageStatusTransformer: MessageStatusTransformer = new MessageStatusTransformer(yuzhiProtocol, 0);
-        return yuzhiProtocol;
     }
 
-    private decode(content: Buffer) {
+    private decode(content: Buffer): YuzhitalkProto | undefined {
         let yuzhiProtocol: YuzhitalkProto;
         try {
             yuzhiProtocol = this.protocol.DecodeProto(decodeyuzhitalkproto(content));
@@ -107,4 +114,3 @@ export class Protocol implements IProtocol {
         return yuzhiProtocol;
     }
 }
-
