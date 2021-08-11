@@ -1,9 +1,8 @@
-import { IUnique } from './common/selfdictionary';
 import { yuzhitalkproto, MessageType } from './normal';
-import { SelfDictionary } from './common/selfdictionary';
-import { IDisposable } from '../common/lifecycle';
+import { IDisposable } from 'yuzhi/common/lifecycle';
 import { createDecorator } from 'yuzhi/instantiation/common/instantiation';
 import { IInstantiationService } from 'yuzhi/instantiation/common/instantiation';
+import { IUnique, SelfDictionary } from 'yuzhi/utility/SelfDictionary';
 
 enum MessageStatus {
     SendMsgRequest,

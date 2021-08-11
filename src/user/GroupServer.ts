@@ -1,12 +1,12 @@
 import { ICommonProps } from './common';
 import { IUserManagerServerIDNumber, UserManagerServer } from './UserManagerServer';
 
-interface IUserService extends ICommonProps{
+interface IGroupService extends ICommonProps{
 
     
 }
 
-class UserService implements IUserService {
+class GroupService implements IGroupService {
 
     constructor( @IUserManagerServerIDNumber private userManageruserService: UserManagerServer<number>) {}
     
@@ -22,4 +22,4 @@ class UserService implements IUserService {
     }
 }
 
-export = UserService;
+export = GroupService;

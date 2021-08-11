@@ -19,6 +19,11 @@ export class SelfDictionary<U, T extends IUnique<U>> {
         return this.map.has(key);
     }
 
+    public has1(key: T): boolean
+    {
+        return this.map.has(key.Unique());
+    }
+
     public get(key: U) {
         return this.map.get(key);
     }
