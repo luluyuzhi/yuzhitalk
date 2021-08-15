@@ -25,6 +25,7 @@
         "log4js": "^6.3.0",
         "mysql2": "^2.3.0",
         "pbjs": "0.0.14",
+        "priorityqueue": "^1.0.0",
         "protobufjs": "^6.10.2",
         "reflect-metadata": "^0.1.13",
         "typeorm": "^0.2.36",
