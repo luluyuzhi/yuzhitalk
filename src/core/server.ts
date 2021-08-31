@@ -15,7 +15,7 @@ export class NetService implements IServer {
 
     private server: Server;
     public constructor(private options: unknown, @IProtocol protocol: IProtocol) {
-        this.server = createServer(options, (socket: TLSSocket) => {
+        this.server = createServer(this.options, (socket: TLSSocket) => {
             console.log('server connected',
                 socket.authorized ? 'authorized' : 'unauthorized');
             socket.on('data', (message: Buffer | string | String) => {
@@ -24,8 +24,12 @@ export class NetService implements IServer {
                     socket.end();
                     return;
                 }
+
+                console.log(
+                    'ip', socket.remoteAddress, 'port', socket.remotePort,
+                    'server received', message.toString());
+
                 const body = protocol.handleProtocol(message, socket);
-                
 
                 socket.write(message);
                 // whats mean？

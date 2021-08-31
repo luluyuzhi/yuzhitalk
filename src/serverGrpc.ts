@@ -16,5 +16,3 @@ export class Dapr {
 
     private constructor() { }
 }
-
-

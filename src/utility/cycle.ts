@@ -21,27 +21,24 @@ export class CycleService<U, T extends ICycleElem<U>> {
 
     private cycleTimeout?: NodeJS.Timer;
 
-    constructor(private timeout: number) {
-
-    }
+    constructor(private timeout: number) { }
 
     setCycle(box: T): T {
-        if (this.priorityQueue.length != 0) {
-            this.initialize();
-        }
         this.priorityQueue.push({
             timeout: this.timeout,
             value: Date.now(),
             id: box.Unique(),
             box
         });
+        if (!this.cycleTimeout) {
+            this.initialize();
+        }
         return box;
     }
 
     initialize(): void {
         const timeOut = () => {
             this.cycleTimeout = setTimeout(() => {
-
                 while (this.priorityQueue.length > 0) {
                     let cycle = this.priorityQueue.top();
                     if (cycle.value + this.timeout < Date.now()) {

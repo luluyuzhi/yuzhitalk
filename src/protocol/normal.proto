@@ -116,14 +116,12 @@ message recallMessage
     optional int32 ignoreTime = 5;
 }
 
-
-
 message yuzhitalkproto
 {
     // protobuf body
     required MessageType messageType =1 [default = Text];
     required int64 timestamp =2;
-    required string statustransfrom =3; /* /18630977999/17695926999 */
+    required string statustransfrom =3; /* /18630977999/17695926999/ */
     oneof body {
         TransfromText transfromtext =4;
         TransfromVoice transfromVoice =5;
@@ -131,7 +129,8 @@ message yuzhitalkproto
         TransfromVideo transfromVideo =7;
         TransfromPosition transfromPosition =8;
         TransfromFile transfromFile =9;
-        Notify notify =10;
+        AuthUser authUser =10;
+        Notify notify =11;
     }
     map<string, string> option =99;
     map<string, string> server =100;
