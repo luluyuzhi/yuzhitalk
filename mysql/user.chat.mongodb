@@ -11,14 +11,7 @@ use(database);
 db.createCollection(collection);
 db.createCollection("runoob")
 
-db.col.insert({title: 'MongoDB 教程', 
-    description: 'MongoDB 是一个 Nosql 数据库',
-    by: '菜鸟教程',
-    url: 'http://www.runoob.com',
-    tags: ['mongodb', 'database', 'NoSQL'],
-    likes: 100
-})
-
+// 消息
 db.col.insert({
     "_id": 3213123,  // 唯一标识
     "sender": 123456, // 发送者
@@ -28,4 +21,31 @@ db.col.insert({
     "time": "", // 消息时间
 })
 
+// 我认为这种多读小写和多写少读和 非关系数据库更能很好的描述数据库的结构
+// 好友关系 ！！！ 此处不要了
+{
+    "_id": "", // 唯一标识
+    "friend_id": [
+        {
+            "id": "3123",
+            "message_id": ""
+        }
+    ]
+}
+
+/*
+// 通过共享号段来解决，多用户共享问题
+{
+    userid: 3123312,
+    current_message_id: [],
+    max_messageid: 123123,
+}
+
+*/
+db.col.insert({
+    "_id": 3213123,  // 唯一标识  用户好友标识
+    messages: []
+}
+
+// 我们可以给每一个用户分给一些序列
 db.col.find({"sender":123456, "receive":123466, "_id": {$lt:3214000}})
