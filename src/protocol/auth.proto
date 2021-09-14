@@ -10,10 +10,16 @@ enum EAuthType
     EMAIL =1;
     ACCOUNT =2;
 }
-message AuthUser 
+
+message AuthStatus
+{
+    required int64 code = 1;
+    required string message =2;
+}
+
+message AuthUser
 {
     required string authUserAccount =1;
-    required string secretKey =2;
+    required AuthToken secretKey =2;
     required EAuthType authType = 3 [default = PHONE];
-    optional string other = 4;
 }
