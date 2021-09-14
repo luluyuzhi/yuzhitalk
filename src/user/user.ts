@@ -12,11 +12,9 @@ export interface ICommonPropsHandler<T> extends IUnique<T>, IContentHandler, ICy
 
 }
 
-
 // 1. 通过 userId 自初始化， user 处于业务层， 它与数据库隔离。
 // 2. 通过 userId / group 找到 user / group 甚至其他的 key 能找到 类似 user group的服务
 // 3. user 不一定与 当前在线用户 一一对应 ，可以是一个离线用户，也可以是一个在线用户。 因此 它有可能具有临时状态。
-
 // 4. user 属于谁， user 属于 userServer
 export class User<T> implements ICommonPropsHandler<T> {
 
@@ -60,14 +58,19 @@ export class VirtualUser<T> implements ICommonPropsHandler<T> {
     }, 10000);
 }
 
-
 export class Group<T> implements ICommonPropsHandler<T> {
-    Unique: () => T;
+
+    private handlers: (ICommonPropsHandler<T> | T)[] = [];
+
+    constructor(
+        private readonly groupId: T,
+    ) { }
+
+    Unique() { return this.groupId; };
+
     dispose(): void {
         throw new Error('Method not implemented.');
     }
-
-    private users: (User<T> | { Unique(): T; } | T)[] = [];
 
     handle(status: string): void {
         throw new Error('Method not implemented.');

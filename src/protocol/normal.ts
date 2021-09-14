@@ -1,21 +1,3 @@
-export const enum EAuthType {
-  PHONE = "PHONE",
-  EMAIL = "EMAIL",
-  ACCOUNT = "ACCOUNT",
-}
-
-export const encodeEAuthType: { [key: string]: number } = {
-  PHONE: 0,
-  EMAIL: 1,
-  ACCOUNT: 2,
-};
-
-export const decodeEAuthType: { [key: number]: EAuthType } = {
-  0: EAuthType.PHONE,
-  1: EAuthType.EMAIL,
-  2: EAuthType.ACCOUNT,
-};
-
 export const enum MessageType {
   Text = "Text",
   Voice = "Voice",
@@ -24,6 +6,9 @@ export const enum MessageType {
   Position = "Position",
   File = "File",
   Notify = "Notify",
+  Ack = "Ack",
+  Exist = "Exist",
+  System = "System",
   Custom = "Custom",
 }
 
@@ -35,6 +20,9 @@ export const encodeMessageType: { [key: string]: number } = {
   Position: 4,
   File: 5,
   Notify: 10,
+  Ack: 11,
+  Exist: 12,
+  System: 99,
   Custom: 100,
 };
 
@@ -46,171 +34,11 @@ export const decodeMessageType: { [key: number]: MessageType } = {
   4: MessageType.Position,
   5: MessageType.File,
   10: MessageType.Notify,
+  11: MessageType.Ack,
+  12: MessageType.Exist,
+  99: MessageType.System,
   100: MessageType.Custom,
 };
-
-export const enum RecallType {
-  POINT2POINT = "POINT2POINT",
-  GROUP = "GROUP",
-}
-
-export const encodeRecallType: { [key: string]: number } = {
-  POINT2POINT: 0,
-  GROUP: 1,
-};
-
-export const decodeRecallType: { [key: number]: RecallType } = {
-  0: RecallType.POINT2POINT,
-  1: RecallType.GROUP,
-};
-
-export interface AuthToken {
-  token: string;
-}
-
-export function encodeAuthToken(message: AuthToken): Uint8Array {
-  let bb = popByteBuffer();
-  _encodeAuthToken(message, bb);
-  return toUint8Array(bb);
-}
-
-function _encodeAuthToken(message: AuthToken, bb: ByteBuffer): void {
-  // required string token = 1;
-  let $token = message.token;
-  if ($token !== undefined) {
-    writeVarint32(bb, 10);
-    writeString(bb, $token);
-  }
-}
-
-export function decodeAuthToken(binary: Uint8Array): AuthToken {
-  return _decodeAuthToken(wrapByteBuffer(binary));
-}
-
-function _decodeAuthToken(bb: ByteBuffer): AuthToken {
-  let message: AuthToken = {} as any;
-
-  end_of_message: while (!isAtEnd(bb)) {
-    let tag = readVarint32(bb);
-
-    switch (tag >>> 3) {
-      case 0:
-        break end_of_message;
-
-      // required string token = 1;
-      case 1: {
-        message.token = readString(bb, readVarint32(bb));
-        break;
-      }
-
-      default:
-        skipUnknownField(bb, tag & 7);
-    }
-  }
-
-  if (message.token === undefined)
-    throw new Error("Missing required field: token");
-
-  return message;
-}
-
-export interface AuthUser {
-  authUserAccount: string;
-  secretKey: string;
-  authType: EAuthType;
-  other?: string;
-}
-
-export function encodeAuthUser(message: AuthUser): Uint8Array {
-  let bb = popByteBuffer();
-  _encodeAuthUser(message, bb);
-  return toUint8Array(bb);
-}
-
-function _encodeAuthUser(message: AuthUser, bb: ByteBuffer): void {
-  // required string authUserAccount = 1;
-  let $authUserAccount = message.authUserAccount;
-  if ($authUserAccount !== undefined) {
-    writeVarint32(bb, 10);
-    writeString(bb, $authUserAccount);
-  }
-
-  // required string secretKey = 2;
-  let $secretKey = message.secretKey;
-  if ($secretKey !== undefined) {
-    writeVarint32(bb, 18);
-    writeString(bb, $secretKey);
-  }
-
-  // required EAuthType authType = 3;
-  let $authType = message.authType;
-  if ($authType !== undefined) {
-    writeVarint32(bb, 24);
-    writeVarint32(bb, encodeEAuthType[$authType]);
-  }
-
-  // optional string other = 4;
-  let $other = message.other;
-  if ($other !== undefined) {
-    writeVarint32(bb, 34);
-    writeString(bb, $other);
-  }
-}
-
-export function decodeAuthUser(binary: Uint8Array): AuthUser {
-  return _decodeAuthUser(wrapByteBuffer(binary));
-}
-
-function _decodeAuthUser(bb: ByteBuffer): AuthUser {
-  let message: AuthUser = {} as any;
-
-  end_of_message: while (!isAtEnd(bb)) {
-    let tag = readVarint32(bb);
-
-    switch (tag >>> 3) {
-      case 0:
-        break end_of_message;
-
-      // required string authUserAccount = 1;
-      case 1: {
-        message.authUserAccount = readString(bb, readVarint32(bb));
-        break;
-      }
-
-      // required string secretKey = 2;
-      case 2: {
-        message.secretKey = readString(bb, readVarint32(bb));
-        break;
-      }
-
-      // required EAuthType authType = 3;
-      case 3: {
-        message.authType = decodeEAuthType[readVarint32(bb)];
-        break;
-      }
-
-      // optional string other = 4;
-      case 4: {
-        message.other = readString(bb, readVarint32(bb));
-        break;
-      }
-
-      default:
-        skipUnknownField(bb, tag & 7);
-    }
-  }
-
-  if (message.authUserAccount === undefined)
-    throw new Error("Missing required field: authUserAccount");
-
-  if (message.secretKey === undefined)
-    throw new Error("Missing required field: secretKey");
-
-  if (message.authType === undefined)
-    throw new Error("Missing required field: authType");
-
-  return message;
-}
 
 export interface TransfromText {
   contents: string;
@@ -886,31 +714,39 @@ function _decodeTransfromFile(bb: ByteBuffer): TransfromFile {
   return message;
 }
 
-export interface Notify {
-  messageId: string;
+export interface InternNotify {
+  code: Long;
+  message: string;
 }
 
-export function encodeNotify(message: Notify): Uint8Array {
+export function encodeInternNotify(message: InternNotify): Uint8Array {
   let bb = popByteBuffer();
-  _encodeNotify(message, bb);
+  _encodeInternNotify(message, bb);
   return toUint8Array(bb);
 }
 
-function _encodeNotify(message: Notify, bb: ByteBuffer): void {
-  // required string messageId = 1;
-  let $messageId = message.messageId;
-  if ($messageId !== undefined) {
-    writeVarint32(bb, 10);
-    writeString(bb, $messageId);
+function _encodeInternNotify(message: InternNotify, bb: ByteBuffer): void {
+  // required int64 code = 1;
+  let $code = message.code;
+  if ($code !== undefined) {
+    writeVarint32(bb, 8);
+    writeVarint64(bb, $code);
+  }
+
+  // required string message = 2;
+  let $message = message.message;
+  if ($message !== undefined) {
+    writeVarint32(bb, 18);
+    writeString(bb, $message);
   }
 }
 
-export function decodeNotify(binary: Uint8Array): Notify {
-  return _decodeNotify(wrapByteBuffer(binary));
+export function decodeInternNotify(binary: Uint8Array): InternNotify {
+  return _decodeInternNotify(wrapByteBuffer(binary));
 }
 
-function _decodeNotify(bb: ByteBuffer): Notify {
-  let message: Notify = {} as any;
+function _decodeInternNotify(bb: ByteBuffer): InternNotify {
+  let message: InternNotify = {} as any;
 
   end_of_message: while (!isAtEnd(bb)) {
     let tag = readVarint32(bb);
@@ -919,9 +755,15 @@ function _decodeNotify(bb: ByteBuffer): Notify {
       case 0:
         break end_of_message;
 
-      // required string messageId = 1;
+      // required int64 code = 1;
       case 1: {
-        message.messageId = readString(bb, readVarint32(bb));
+        message.code = readVarint64(bb, /* unsigned */ false);
+        break;
+      }
+
+      // required string message = 2;
+      case 2: {
+        message.message = readString(bb, readVarint32(bb));
         break;
       }
 
@@ -930,15 +772,17 @@ function _decodeNotify(bb: ByteBuffer): Notify {
     }
   }
 
-  if (message.messageId === undefined)
-    throw new Error("Missing required field: messageId");
+  if (message.code === undefined)
+    throw new Error("Missing required field: code");
+
+  if (message.message === undefined)
+    throw new Error("Missing required field: message");
 
   return message;
 }
 
 export interface TransfromNotify {
-  message: string;
-  option?: { [key: string]: string };
+  internalNotify?: InternNotify;
 }
 
 export function encodeTransfromNotify(message: TransfromNotify): Uint8Array {
@@ -948,28 +792,15 @@ export function encodeTransfromNotify(message: TransfromNotify): Uint8Array {
 }
 
 function _encodeTransfromNotify(message: TransfromNotify, bb: ByteBuffer): void {
-  // required string message = 1;
-  let $message = message.message;
-  if ($message !== undefined) {
+  // optional InternNotify internalNotify = 1;
+  let $internalNotify = message.internalNotify;
+  if ($internalNotify !== undefined) {
     writeVarint32(bb, 10);
-    writeString(bb, $message);
-  }
-
-  // optional map<string, string> option = 5;
-  let map$option = message.option;
-  if (map$option !== undefined) {
-    for (let key in map$option) {
-      let nested = popByteBuffer();
-      let value = map$option[key];
-      writeVarint32(nested, 10);
-      writeString(nested, key);
-      writeVarint32(nested, 18);
-      writeString(nested, value);
-      writeVarint32(bb, 42);
-      writeVarint32(bb, nested.offset);
-      writeByteBuffer(bb, nested);
-      pushByteBuffer(nested);
-    }
+    let nested = popByteBuffer();
+    _encodeInternNotify($internalNotify, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
   }
 }
 
@@ -987,39 +818,11 @@ function _decodeTransfromNotify(bb: ByteBuffer): TransfromNotify {
       case 0:
         break end_of_message;
 
-      // required string message = 1;
+      // optional InternNotify internalNotify = 1;
       case 1: {
-        message.message = readString(bb, readVarint32(bb));
-        break;
-      }
-
-      // optional map<string, string> option = 5;
-      case 5: {
-        let values = message.option || (message.option = {});
-        let outerLimit = pushTemporaryLength(bb);
-        let key: string | undefined;
-        let value: string | undefined;
-        end_of_entry: while (!isAtEnd(bb)) {
-          let tag = readVarint32(bb);
-          switch (tag >>> 3) {
-            case 0:
-              break end_of_entry;
-            case 1: {
-              key = readString(bb, readVarint32(bb));
-              break;
-            }
-            case 2: {
-              value = readString(bb, readVarint32(bb));
-              break;
-            }
-            default:
-              skipUnknownField(bb, tag & 7);
-          }
-        }
-        if (key === undefined || value === undefined)
-          throw new Error("Invalid data for map: option");
-        values[key] = value;
-        bb.limit = outerLimit;
+        let limit = pushTemporaryLength(bb);
+        message.internalNotify = _decodeInternNotify(bb);
+        bb.limit = limit;
         break;
       }
 
@@ -1028,73 +831,34 @@ function _decodeTransfromNotify(bb: ByteBuffer): TransfromNotify {
     }
   }
 
-  if (message.message === undefined)
-    throw new Error("Missing required field: message");
-
   return message;
 }
 
-export interface Ack {
+export interface TransfromAck {
   ack: string;
-  timestamp: Long;
-  userId?: { [key: string]: Long };
-  invaildId?: string[];
 }
 
-export function encodeAck(message: Ack): Uint8Array {
+export function encodeTransfromAck(message: TransfromAck): Uint8Array {
   let bb = popByteBuffer();
-  _encodeAck(message, bb);
+  _encodeTransfromAck(message, bb);
   return toUint8Array(bb);
 }
 
-function _encodeAck(message: Ack, bb: ByteBuffer): void {
+function _encodeTransfromAck(message: TransfromAck, bb: ByteBuffer): void {
   // required string ack = 1;
   let $ack = message.ack;
   if ($ack !== undefined) {
     writeVarint32(bb, 10);
     writeString(bb, $ack);
   }
-
-  // required int64 timestamp = 2;
-  let $timestamp = message.timestamp;
-  if ($timestamp !== undefined) {
-    writeVarint32(bb, 16);
-    writeVarint64(bb, $timestamp);
-  }
-
-  // optional map<string, int64> userId = 3;
-  let map$userId = message.userId;
-  if (map$userId !== undefined) {
-    for (let key in map$userId) {
-      let nested = popByteBuffer();
-      let value = map$userId[key];
-      writeVarint32(nested, 10);
-      writeString(nested, key);
-      writeVarint32(nested, 16);
-      writeVarint64(nested, value);
-      writeVarint32(bb, 26);
-      writeVarint32(bb, nested.offset);
-      writeByteBuffer(bb, nested);
-      pushByteBuffer(nested);
-    }
-  }
-
-  // repeated string invaildId = 4;
-  let array$invaildId = message.invaildId;
-  if (array$invaildId !== undefined) {
-    for (let value of array$invaildId) {
-      writeVarint32(bb, 34);
-      writeString(bb, value);
-    }
-  }
 }
 
-export function decodeAck(binary: Uint8Array): Ack {
-  return _decodeAck(wrapByteBuffer(binary));
+export function decodeTransfromAck(binary: Uint8Array): TransfromAck {
+  return _decodeTransfromAck(wrapByteBuffer(binary));
 }
 
-function _decodeAck(bb: ByteBuffer): Ack {
-  let message: Ack = {} as any;
+function _decodeTransfromAck(bb: ByteBuffer): TransfromAck {
+  let message: TransfromAck = {} as any;
 
   end_of_message: while (!isAtEnd(bb)) {
     let tag = readVarint32(bb);
@@ -1109,49 +873,6 @@ function _decodeAck(bb: ByteBuffer): Ack {
         break;
       }
 
-      // required int64 timestamp = 2;
-      case 2: {
-        message.timestamp = readVarint64(bb, /* unsigned */ false);
-        break;
-      }
-
-      // optional map<string, int64> userId = 3;
-      case 3: {
-        let values = message.userId || (message.userId = {});
-        let outerLimit = pushTemporaryLength(bb);
-        let key: string | undefined;
-        let value: Long | undefined;
-        end_of_entry: while (!isAtEnd(bb)) {
-          let tag = readVarint32(bb);
-          switch (tag >>> 3) {
-            case 0:
-              break end_of_entry;
-            case 1: {
-              key = readString(bb, readVarint32(bb));
-              break;
-            }
-            case 2: {
-              value = readVarint64(bb, /* unsigned */ false);
-              break;
-            }
-            default:
-              skipUnknownField(bb, tag & 7);
-          }
-        }
-        if (key === undefined || value === undefined)
-          throw new Error("Invalid data for map: userId");
-        values[key] = value;
-        bb.limit = outerLimit;
-        break;
-      }
-
-      // repeated string invaildId = 4;
-      case 4: {
-        let values = message.invaildId || (message.invaildId = []);
-        values.push(readString(bb, readVarint32(bb)));
-        break;
-      }
-
       default:
         skipUnknownField(bb, tag & 7);
     }
@@ -1160,69 +881,38 @@ function _decodeAck(bb: ByteBuffer): Ack {
   if (message.ack === undefined)
     throw new Error("Missing required field: ack");
 
-  if (message.timestamp === undefined)
-    throw new Error("Missing required field: timestamp");
-
   return message;
 }
 
-export interface recallMessage {
-  statustransfrom: string;
-  deleteMsgid: string;
-  timetag: Long;
-  type: RecallType;
-  ignoreTime?: number;
+export interface TransfromExist {
+  internalNotify?: InternNotify;
 }
 
-export function encoderecallMessage(message: recallMessage): Uint8Array {
+export function encodeTransfromExist(message: TransfromExist): Uint8Array {
   let bb = popByteBuffer();
-  _encoderecallMessage(message, bb);
+  _encodeTransfromExist(message, bb);
   return toUint8Array(bb);
 }
 
-function _encoderecallMessage(message: recallMessage, bb: ByteBuffer): void {
-  // required string statustransfrom = 1;
-  let $statustransfrom = message.statustransfrom;
-  if ($statustransfrom !== undefined) {
+function _encodeTransfromExist(message: TransfromExist, bb: ByteBuffer): void {
+  // optional InternNotify internalNotify = 1;
+  let $internalNotify = message.internalNotify;
+  if ($internalNotify !== undefined) {
     writeVarint32(bb, 10);
-    writeString(bb, $statustransfrom);
-  }
-
-  // required string deleteMsgid = 2;
-  let $deleteMsgid = message.deleteMsgid;
-  if ($deleteMsgid !== undefined) {
-    writeVarint32(bb, 18);
-    writeString(bb, $deleteMsgid);
-  }
-
-  // required int64 timetag = 3;
-  let $timetag = message.timetag;
-  if ($timetag !== undefined) {
-    writeVarint32(bb, 24);
-    writeVarint64(bb, $timetag);
-  }
-
-  // required RecallType type = 4;
-  let $type = message.type;
-  if ($type !== undefined) {
-    writeVarint32(bb, 32);
-    writeVarint32(bb, encodeRecallType[$type]);
-  }
-
-  // optional int32 ignoreTime = 5;
-  let $ignoreTime = message.ignoreTime;
-  if ($ignoreTime !== undefined) {
-    writeVarint32(bb, 40);
-    writeVarint64(bb, intToLong($ignoreTime));
+    let nested = popByteBuffer();
+    _encodeInternNotify($internalNotify, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
   }
 }
 
-export function decoderecallMessage(binary: Uint8Array): recallMessage {
-  return _decoderecallMessage(wrapByteBuffer(binary));
+export function decodeTransfromExist(binary: Uint8Array): TransfromExist {
+  return _decodeTransfromExist(wrapByteBuffer(binary));
 }
 
-function _decoderecallMessage(bb: ByteBuffer): recallMessage {
-  let message: recallMessage = {} as any;
+function _decodeTransfromExist(bb: ByteBuffer): TransfromExist {
+  let message: TransfromExist = {} as any;
 
   end_of_message: while (!isAtEnd(bb)) {
     let tag = readVarint32(bb);
@@ -1231,33 +921,11 @@ function _decoderecallMessage(bb: ByteBuffer): recallMessage {
       case 0:
         break end_of_message;
 
-      // required string statustransfrom = 1;
+      // optional InternNotify internalNotify = 1;
       case 1: {
-        message.statustransfrom = readString(bb, readVarint32(bb));
-        break;
-      }
-
-      // required string deleteMsgid = 2;
-      case 2: {
-        message.deleteMsgid = readString(bb, readVarint32(bb));
-        break;
-      }
-
-      // required int64 timetag = 3;
-      case 3: {
-        message.timetag = readVarint64(bb, /* unsigned */ false);
-        break;
-      }
-
-      // required RecallType type = 4;
-      case 4: {
-        message.type = decodeRecallType[readVarint32(bb)];
-        break;
-      }
-
-      // optional int32 ignoreTime = 5;
-      case 5: {
-        message.ignoreTime = readVarint32(bb);
+        let limit = pushTemporaryLength(bb);
+        message.internalNotify = _decodeInternNotify(bb);
+        bb.limit = limit;
         break;
       }
 
@@ -1266,142 +934,89 @@ function _decoderecallMessage(bb: ByteBuffer): recallMessage {
     }
   }
 
-  if (message.statustransfrom === undefined)
-    throw new Error("Missing required field: statustransfrom");
+  return message;
+}
 
-  if (message.deleteMsgid === undefined)
-    throw new Error("Missing required field: deleteMsgid");
+export interface TransfromSystem {
+  code: Long;
+  contents: string;
+}
 
-  if (message.timetag === undefined)
-    throw new Error("Missing required field: timetag");
+export function encodeTransfromSystem(message: TransfromSystem): Uint8Array {
+  let bb = popByteBuffer();
+  _encodeTransfromSystem(message, bb);
+  return toUint8Array(bb);
+}
 
-  if (message.type === undefined)
-    throw new Error("Missing required field: type");
+function _encodeTransfromSystem(message: TransfromSystem, bb: ByteBuffer): void {
+  // required int64 code = 1;
+  let $code = message.code;
+  if ($code !== undefined) {
+    writeVarint32(bb, 8);
+    writeVarint64(bb, $code);
+  }
+
+  // required string contents = 2;
+  let $contents = message.contents;
+  if ($contents !== undefined) {
+    writeVarint32(bb, 18);
+    writeString(bb, $contents);
+  }
+}
+
+export function decodeTransfromSystem(binary: Uint8Array): TransfromSystem {
+  return _decodeTransfromSystem(wrapByteBuffer(binary));
+}
+
+function _decodeTransfromSystem(bb: ByteBuffer): TransfromSystem {
+  let message: TransfromSystem = {} as any;
+
+  end_of_message: while (!isAtEnd(bb)) {
+    let tag = readVarint32(bb);
+
+    switch (tag >>> 3) {
+      case 0:
+        break end_of_message;
+
+      // required int64 code = 1;
+      case 1: {
+        message.code = readVarint64(bb, /* unsigned */ false);
+        break;
+      }
+
+      // required string contents = 2;
+      case 2: {
+        message.contents = readString(bb, readVarint32(bb));
+        break;
+      }
+
+      default:
+        skipUnknownField(bb, tag & 7);
+    }
+  }
+
+  if (message.code === undefined)
+    throw new Error("Missing required field: code");
+
+  if (message.contents === undefined)
+    throw new Error("Missing required field: contents");
 
   return message;
 }
 
-export interface yuzhitalkproto {
-  messageType: MessageType;
-  timestamp: Long;
-  statustransfrom: string;
-  transfromtext?: TransfromText;
-  transfromVoice?: TransfromVoice;
-  transfromImage?: TransfromImage;
-  transfromVideo?: TransfromVideo;
-  transfromPosition?: TransfromPosition;
-  transfromFile?: TransfromFile;
-  notify?: Notify;
+export interface TransfromCustom {
   option?: { [key: string]: string };
   server?: { [key: string]: string };
 }
 
-export function encodeyuzhitalkproto(message: yuzhitalkproto): Uint8Array {
+export function encodeTransfromCustom(message: TransfromCustom): Uint8Array {
   let bb = popByteBuffer();
-  _encodeyuzhitalkproto(message, bb);
+  _encodeTransfromCustom(message, bb);
   return toUint8Array(bb);
 }
 
-function _encodeyuzhitalkproto(message: yuzhitalkproto, bb: ByteBuffer): void {
-  // required MessageType messageType = 1;
-  let $messageType = message.messageType;
-  if ($messageType !== undefined) {
-    writeVarint32(bb, 8);
-    writeVarint32(bb, encodeMessageType[$messageType]);
-  }
-
-  // required int64 timestamp = 2;
-  let $timestamp = message.timestamp;
-  if ($timestamp !== undefined) {
-    writeVarint32(bb, 16);
-    writeVarint64(bb, $timestamp);
-  }
-
-  // required string statustransfrom = 3;
-  let $statustransfrom = message.statustransfrom;
-  if ($statustransfrom !== undefined) {
-    writeVarint32(bb, 26);
-    writeString(bb, $statustransfrom);
-  }
-
-  // optional TransfromText transfromtext = 4;
-  let $transfromtext = message.transfromtext;
-  if ($transfromtext !== undefined) {
-    writeVarint32(bb, 34);
-    let nested = popByteBuffer();
-    _encodeTransfromText($transfromtext, nested);
-    writeVarint32(bb, nested.limit);
-    writeByteBuffer(bb, nested);
-    pushByteBuffer(nested);
-  }
-
-  // optional TransfromVoice transfromVoice = 5;
-  let $transfromVoice = message.transfromVoice;
-  if ($transfromVoice !== undefined) {
-    writeVarint32(bb, 42);
-    let nested = popByteBuffer();
-    _encodeTransfromVoice($transfromVoice, nested);
-    writeVarint32(bb, nested.limit);
-    writeByteBuffer(bb, nested);
-    pushByteBuffer(nested);
-  }
-
-  // optional TransfromImage transfromImage = 6;
-  let $transfromImage = message.transfromImage;
-  if ($transfromImage !== undefined) {
-    writeVarint32(bb, 50);
-    let nested = popByteBuffer();
-    _encodeTransfromImage($transfromImage, nested);
-    writeVarint32(bb, nested.limit);
-    writeByteBuffer(bb, nested);
-    pushByteBuffer(nested);
-  }
-
-  // optional TransfromVideo transfromVideo = 7;
-  let $transfromVideo = message.transfromVideo;
-  if ($transfromVideo !== undefined) {
-    writeVarint32(bb, 58);
-    let nested = popByteBuffer();
-    _encodeTransfromVideo($transfromVideo, nested);
-    writeVarint32(bb, nested.limit);
-    writeByteBuffer(bb, nested);
-    pushByteBuffer(nested);
-  }
-
-  // optional TransfromPosition transfromPosition = 8;
-  let $transfromPosition = message.transfromPosition;
-  if ($transfromPosition !== undefined) {
-    writeVarint32(bb, 66);
-    let nested = popByteBuffer();
-    _encodeTransfromPosition($transfromPosition, nested);
-    writeVarint32(bb, nested.limit);
-    writeByteBuffer(bb, nested);
-    pushByteBuffer(nested);
-  }
-
-  // optional TransfromFile transfromFile = 9;
-  let $transfromFile = message.transfromFile;
-  if ($transfromFile !== undefined) {
-    writeVarint32(bb, 74);
-    let nested = popByteBuffer();
-    _encodeTransfromFile($transfromFile, nested);
-    writeVarint32(bb, nested.limit);
-    writeByteBuffer(bb, nested);
-    pushByteBuffer(nested);
-  }
-
-  // optional Notify notify = 10;
-  let $notify = message.notify;
-  if ($notify !== undefined) {
-    writeVarint32(bb, 82);
-    let nested = popByteBuffer();
-    _encodeNotify($notify, nested);
-    writeVarint32(bb, nested.limit);
-    writeByteBuffer(bb, nested);
-    pushByteBuffer(nested);
-  }
-
-  // optional map<string, string> option = 99;
+function _encodeTransfromCustom(message: TransfromCustom, bb: ByteBuffer): void {
+  // optional map<string, string> option = 1;
   let map$option = message.option;
   if (map$option !== undefined) {
     for (let key in map$option) {
@@ -1411,14 +1026,14 @@ function _encodeyuzhitalkproto(message: yuzhitalkproto, bb: ByteBuffer): void {
       writeString(nested, key);
       writeVarint32(nested, 18);
       writeString(nested, value);
-      writeVarint32(bb, 794);
+      writeVarint32(bb, 10);
       writeVarint32(bb, nested.offset);
       writeByteBuffer(bb, nested);
       pushByteBuffer(nested);
     }
   }
 
-  // optional map<string, string> server = 100;
+  // optional map<string, string> server = 2;
   let map$server = message.server;
   if (map$server !== undefined) {
     for (let key in map$server) {
@@ -1428,7 +1043,7 @@ function _encodeyuzhitalkproto(message: yuzhitalkproto, bb: ByteBuffer): void {
       writeString(nested, key);
       writeVarint32(nested, 18);
       writeString(nested, value);
-      writeVarint32(bb, 802);
+      writeVarint32(bb, 18);
       writeVarint32(bb, nested.offset);
       writeByteBuffer(bb, nested);
       pushByteBuffer(nested);
@@ -1436,12 +1051,12 @@ function _encodeyuzhitalkproto(message: yuzhitalkproto, bb: ByteBuffer): void {
   }
 }
 
-export function decodeyuzhitalkproto(binary: Uint8Array): yuzhitalkproto {
-  return _decodeyuzhitalkproto(wrapByteBuffer(binary));
+export function decodeTransfromCustom(binary: Uint8Array): TransfromCustom {
+  return _decodeTransfromCustom(wrapByteBuffer(binary));
 }
 
-function _decodeyuzhitalkproto(bb: ByteBuffer): yuzhitalkproto {
-  let message: yuzhitalkproto = {} as any;
+function _decodeTransfromCustom(bb: ByteBuffer): TransfromCustom {
+  let message: TransfromCustom = {} as any;
 
   end_of_message: while (!isAtEnd(bb)) {
     let tag = readVarint32(bb);
@@ -1450,82 +1065,8 @@ function _decodeyuzhitalkproto(bb: ByteBuffer): yuzhitalkproto {
       case 0:
         break end_of_message;
 
-      // required MessageType messageType = 1;
+      // optional map<string, string> option = 1;
       case 1: {
-        message.messageType = decodeMessageType[readVarint32(bb)];
-        break;
-      }
-
-      // required int64 timestamp = 2;
-      case 2: {
-        message.timestamp = readVarint64(bb, /* unsigned */ false);
-        break;
-      }
-
-      // required string statustransfrom = 3;
-      case 3: {
-        message.statustransfrom = readString(bb, readVarint32(bb));
-        break;
-      }
-
-      // optional TransfromText transfromtext = 4;
-      case 4: {
-        let limit = pushTemporaryLength(bb);
-        message.transfromtext = _decodeTransfromText(bb);
-        bb.limit = limit;
-        break;
-      }
-
-      // optional TransfromVoice transfromVoice = 5;
-      case 5: {
-        let limit = pushTemporaryLength(bb);
-        message.transfromVoice = _decodeTransfromVoice(bb);
-        bb.limit = limit;
-        break;
-      }
-
-      // optional TransfromImage transfromImage = 6;
-      case 6: {
-        let limit = pushTemporaryLength(bb);
-        message.transfromImage = _decodeTransfromImage(bb);
-        bb.limit = limit;
-        break;
-      }
-
-      // optional TransfromVideo transfromVideo = 7;
-      case 7: {
-        let limit = pushTemporaryLength(bb);
-        message.transfromVideo = _decodeTransfromVideo(bb);
-        bb.limit = limit;
-        break;
-      }
-
-      // optional TransfromPosition transfromPosition = 8;
-      case 8: {
-        let limit = pushTemporaryLength(bb);
-        message.transfromPosition = _decodeTransfromPosition(bb);
-        bb.limit = limit;
-        break;
-      }
-
-      // optional TransfromFile transfromFile = 9;
-      case 9: {
-        let limit = pushTemporaryLength(bb);
-        message.transfromFile = _decodeTransfromFile(bb);
-        bb.limit = limit;
-        break;
-      }
-
-      // optional Notify notify = 10;
-      case 10: {
-        let limit = pushTemporaryLength(bb);
-        message.notify = _decodeNotify(bb);
-        bb.limit = limit;
-        break;
-      }
-
-      // optional map<string, string> option = 99;
-      case 99: {
         let values = message.option || (message.option = {});
         let outerLimit = pushTemporaryLength(bb);
         let key: string | undefined;
@@ -1554,8 +1095,8 @@ function _decodeyuzhitalkproto(bb: ByteBuffer): yuzhitalkproto {
         break;
       }
 
-      // optional map<string, string> server = 100;
-      case 100: {
+      // optional map<string, string> server = 2;
+      case 2: {
         let values = message.server || (message.server = {});
         let outerLimit = pushTemporaryLength(bb);
         let key: string | undefined;
@@ -1589,6 +1130,329 @@ function _decodeyuzhitalkproto(bb: ByteBuffer): yuzhitalkproto {
     }
   }
 
+  return message;
+}
+
+export interface yuzhitalkproto {
+  messageType: MessageType;
+  timestamp: Long;
+  statustransfrom: Long;
+  statustransto: Long;
+  id?: Long;
+  transfromtext?: TransfromText;
+  transfromVoice?: TransfromVoice;
+  transfromImage?: TransfromImage;
+  transfromVideo?: TransfromVideo;
+  transfromPosition?: TransfromPosition;
+  transfromFile?: TransfromFile;
+  transfromExist?: TransfromExist;
+  transfromAck?: TransfromAck;
+  transfromNotify?: TransfromNotify;
+  transfromSystem?: TransfromSystem;
+  transfromCustom?: TransfromCustom;
+}
+
+export function encodeyuzhitalkproto(message: yuzhitalkproto): Uint8Array {
+  let bb = popByteBuffer();
+  _encodeyuzhitalkproto(message, bb);
+  return toUint8Array(bb);
+}
+
+function _encodeyuzhitalkproto(message: yuzhitalkproto, bb: ByteBuffer): void {
+  // required MessageType messageType = 1;
+  let $messageType = message.messageType;
+  if ($messageType !== undefined) {
+    writeVarint32(bb, 8);
+    writeVarint32(bb, encodeMessageType[$messageType]);
+  }
+
+  // required int64 timestamp = 2;
+  let $timestamp = message.timestamp;
+  if ($timestamp !== undefined) {
+    writeVarint32(bb, 16);
+    writeVarint64(bb, $timestamp);
+  }
+
+  // required int64 statustransfrom = 3;
+  let $statustransfrom = message.statustransfrom;
+  if ($statustransfrom !== undefined) {
+    writeVarint32(bb, 24);
+    writeVarint64(bb, $statustransfrom);
+  }
+
+  // required int64 statustransto = 4;
+  let $statustransto = message.statustransto;
+  if ($statustransto !== undefined) {
+    writeVarint32(bb, 32);
+    writeVarint64(bb, $statustransto);
+  }
+
+  // optional int64 id = 5;
+  let $id = message.id;
+  if ($id !== undefined) {
+    writeVarint32(bb, 40);
+    writeVarint64(bb, $id);
+  }
+
+  // optional TransfromText transfromtext = 6;
+  let $transfromtext = message.transfromtext;
+  if ($transfromtext !== undefined) {
+    writeVarint32(bb, 50);
+    let nested = popByteBuffer();
+    _encodeTransfromText($transfromtext, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+
+  // optional TransfromVoice transfromVoice = 7;
+  let $transfromVoice = message.transfromVoice;
+  if ($transfromVoice !== undefined) {
+    writeVarint32(bb, 58);
+    let nested = popByteBuffer();
+    _encodeTransfromVoice($transfromVoice, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+
+  // optional TransfromImage transfromImage = 8;
+  let $transfromImage = message.transfromImage;
+  if ($transfromImage !== undefined) {
+    writeVarint32(bb, 66);
+    let nested = popByteBuffer();
+    _encodeTransfromImage($transfromImage, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+
+  // optional TransfromVideo transfromVideo = 9;
+  let $transfromVideo = message.transfromVideo;
+  if ($transfromVideo !== undefined) {
+    writeVarint32(bb, 74);
+    let nested = popByteBuffer();
+    _encodeTransfromVideo($transfromVideo, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+
+  // optional TransfromPosition transfromPosition = 10;
+  let $transfromPosition = message.transfromPosition;
+  if ($transfromPosition !== undefined) {
+    writeVarint32(bb, 82);
+    let nested = popByteBuffer();
+    _encodeTransfromPosition($transfromPosition, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+
+  // optional TransfromFile transfromFile = 11;
+  let $transfromFile = message.transfromFile;
+  if ($transfromFile !== undefined) {
+    writeVarint32(bb, 90);
+    let nested = popByteBuffer();
+    _encodeTransfromFile($transfromFile, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+
+  // optional TransfromExist transfromExist = 12;
+  let $transfromExist = message.transfromExist;
+  if ($transfromExist !== undefined) {
+    writeVarint32(bb, 98);
+    let nested = popByteBuffer();
+    _encodeTransfromExist($transfromExist, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+
+  // optional TransfromAck transfromAck = 13;
+  let $transfromAck = message.transfromAck;
+  if ($transfromAck !== undefined) {
+    writeVarint32(bb, 106);
+    let nested = popByteBuffer();
+    _encodeTransfromAck($transfromAck, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+
+  // optional TransfromNotify transfromNotify = 14;
+  let $transfromNotify = message.transfromNotify;
+  if ($transfromNotify !== undefined) {
+    writeVarint32(bb, 114);
+    let nested = popByteBuffer();
+    _encodeTransfromNotify($transfromNotify, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+
+  // optional TransfromSystem transfromSystem = 15;
+  let $transfromSystem = message.transfromSystem;
+  if ($transfromSystem !== undefined) {
+    writeVarint32(bb, 122);
+    let nested = popByteBuffer();
+    _encodeTransfromSystem($transfromSystem, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+
+  // optional TransfromCustom transfromCustom = 16;
+  let $transfromCustom = message.transfromCustom;
+  if ($transfromCustom !== undefined) {
+    writeVarint32(bb, 130);
+    let nested = popByteBuffer();
+    _encodeTransfromCustom($transfromCustom, nested);
+    writeVarint32(bb, nested.limit);
+    writeByteBuffer(bb, nested);
+    pushByteBuffer(nested);
+  }
+}
+
+export function decodeyuzhitalkproto(binary: Uint8Array): yuzhitalkproto {
+  return _decodeyuzhitalkproto(wrapByteBuffer(binary));
+}
+
+function _decodeyuzhitalkproto(bb: ByteBuffer): yuzhitalkproto {
+  let message: yuzhitalkproto = {} as any;
+
+  end_of_message: while (!isAtEnd(bb)) {
+    let tag = readVarint32(bb);
+
+    switch (tag >>> 3) {
+      case 0:
+        break end_of_message;
+
+      // required MessageType messageType = 1;
+      case 1: {
+        message.messageType = decodeMessageType[readVarint32(bb)];
+        break;
+      }
+
+      // required int64 timestamp = 2;
+      case 2: {
+        message.timestamp = readVarint64(bb, /* unsigned */ false);
+        break;
+      }
+
+      // required int64 statustransfrom = 3;
+      case 3: {
+        message.statustransfrom = readVarint64(bb, /* unsigned */ false);
+        break;
+      }
+
+      // required int64 statustransto = 4;
+      case 4: {
+        message.statustransto = readVarint64(bb, /* unsigned */ false);
+        break;
+      }
+
+      // optional int64 id = 5;
+      case 5: {
+        message.id = readVarint64(bb, /* unsigned */ false);
+        break;
+      }
+
+      // optional TransfromText transfromtext = 6;
+      case 6: {
+        let limit = pushTemporaryLength(bb);
+        message.transfromtext = _decodeTransfromText(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      // optional TransfromVoice transfromVoice = 7;
+      case 7: {
+        let limit = pushTemporaryLength(bb);
+        message.transfromVoice = _decodeTransfromVoice(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      // optional TransfromImage transfromImage = 8;
+      case 8: {
+        let limit = pushTemporaryLength(bb);
+        message.transfromImage = _decodeTransfromImage(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      // optional TransfromVideo transfromVideo = 9;
+      case 9: {
+        let limit = pushTemporaryLength(bb);
+        message.transfromVideo = _decodeTransfromVideo(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      // optional TransfromPosition transfromPosition = 10;
+      case 10: {
+        let limit = pushTemporaryLength(bb);
+        message.transfromPosition = _decodeTransfromPosition(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      // optional TransfromFile transfromFile = 11;
+      case 11: {
+        let limit = pushTemporaryLength(bb);
+        message.transfromFile = _decodeTransfromFile(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      // optional TransfromExist transfromExist = 12;
+      case 12: {
+        let limit = pushTemporaryLength(bb);
+        message.transfromExist = _decodeTransfromExist(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      // optional TransfromAck transfromAck = 13;
+      case 13: {
+        let limit = pushTemporaryLength(bb);
+        message.transfromAck = _decodeTransfromAck(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      // optional TransfromNotify transfromNotify = 14;
+      case 14: {
+        let limit = pushTemporaryLength(bb);
+        message.transfromNotify = _decodeTransfromNotify(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      // optional TransfromSystem transfromSystem = 15;
+      case 15: {
+        let limit = pushTemporaryLength(bb);
+        message.transfromSystem = _decodeTransfromSystem(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      // optional TransfromCustom transfromCustom = 16;
+      case 16: {
+        let limit = pushTemporaryLength(bb);
+        message.transfromCustom = _decodeTransfromCustom(bb);
+        bb.limit = limit;
+        break;
+      }
+
+      default:
+        skipUnknownField(bb, tag & 7);
+    }
+  }
+
   if (message.messageType === undefined)
     throw new Error("Missing required field: messageType");
 
@@ -1597,6 +1461,9 @@ function _decodeyuzhitalkproto(bb: ByteBuffer): yuzhitalkproto {
 
   if (message.statustransfrom === undefined)
     throw new Error("Missing required field: statustransfrom");
+
+  if (message.statustransto === undefined)
+    throw new Error("Missing required field: statustransto");
 
   return message;
 }
@@ -1657,7 +1524,7 @@ let f32_u8 = new Uint8Array(f32.buffer);
 let f64 = new Float64Array(1);
 let f64_u8 = new Uint8Array(f64.buffer);
 
-function intToLong(value: number): Long {
+export function intToLong(value: number): Long {
   value |= 0;
   return {
     low: value,

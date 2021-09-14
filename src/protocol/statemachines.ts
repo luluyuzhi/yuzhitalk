@@ -3,6 +3,8 @@ import { IDisposable } from 'yuzhi/common/lifecycle';
 import { createDecorator } from 'yuzhi/instantiation/common/instantiation';
 import { IInstantiationService } from 'yuzhi/instantiation/common/instantiation';
 import { IUnique, SelfDictionary } from 'yuzhi/utility/SelfDictionary';
+import { ServiceCollection } from '../instantiation/common/serviceCollection';
+import { SyncDescriptor } from '../instantiation/common/descriptors';
 
 enum MessageStatus {
     SendMsgRequest,
@@ -14,8 +16,8 @@ enum MessageStatus {
 }
 
 interface IStatusImpl {
-    Gen: () => Generator<MessageStatus, void, unknown>
-    Status: () => MessageStatus
+    Gen: () => Generator<MessageStatus, void, unknown>;
+    Status: () => MessageStatus;
 }
 
 interface IStatus extends IDisposable, IStatusImpl, IUnique<number> { }
@@ -27,7 +29,7 @@ export class MessageStatusTransformer implements IStatusImpl {
         private messageStatus: MessageStatus = MessageStatus.SendMsgRequest,) {
     }
 
-    Unique(): number { return this.id };
+    Unique(): number { return this.id; };
 
     *Gen(): Generator<MessageStatus, void, unknown> {
         yield this.messageStatus = MessageStatus.SendMsgNotify;
@@ -53,22 +55,39 @@ export interface IProtocolCollocationServer {
 export const IProtocolCollocationServer = createDecorator<IProtocolCollocationServer>('protocolCollocationServer');
 
 export class ProtocolCollocationServer implements IProtocolCollocationServer {
+    declare readonly _serviceBrand: undefined;
     private selfDictionary = new SelfDictionary();
+    private subInstantiationService = this.createServices();
     constructor(
         @IInstantiationService private InstantiationService: IInstantiationService,
-        @IStatusMachine private statusMachine: IStatusMachine
     ) { }
-    handleSource(content: yuzhitalkproto) {
-        //1. 查表， 如果在的话就 继续处理
-        //2. 不在就加入
-        let messageStatusTransformer = new MessageStatusTransformer(content, 0);
-        let dispose = this.selfDictionary.set(messageStatusTransformer);
-        this.statusMachine.initStatus({
-            ...dispose,
-            Gen: messageStatusTransformer.Gen,
-            Status: messageStatusTransformer.Status,
-            Unique: messageStatusTransformer.Unique
-        }, undefined);
+
+    private createServices(): IInstantiationService {
+        let collection = new ServiceCollection();
+        collection.set(IStatusMachine, new SyncDescriptor<IStatusMachine>(StateMachinesServer));
+        return this.InstantiationService.createChild(collection);
+    }
+
+    handleSource(content: yuzhitalkproto, /*socket*/) {
+        this.subInstantiationService.invokeFunction(
+            (accessor) => {
+                const statusMachine = accessor.get(IStatusMachine);
+                //1. 查表， 如果在的话就 继续处理
+                //2. 不在就加入
+
+                if (![MessageType.Ack, MessageType.Notify].includes(content.messageType)) {
+
+                    let messageStatusTransformer = new MessageStatusTransformer(content, 0);
+                    let dispose = this.selfDictionary.set(messageStatusTransformer);
+                    statusMachine.initStatus({
+                        ...dispose,
+                        Gen: messageStatusTransformer.Gen,
+                        Status: messageStatusTransformer.Status,
+                        Unique: messageStatusTransformer.Unique
+                    }, undefined);
+                }
+            }
+        );
     }
 
     join(content: yuzhitalkproto) {
@@ -76,12 +95,12 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
         //2. 不在就加入
         let messageStatusTransformer = new MessageStatusTransformer(content, 0);
         let dispose = this.selfDictionary.set(messageStatusTransformer);
-        this.statusMachine.initStatus({
-            ...dispose,
-            Gen: messageStatusTransformer.Gen,
-            Status: messageStatusTransformer.Status,
-            Unique: messageStatusTransformer.Unique
-        }, undefined);
+        // this.statusMachine.initStatus({
+        //     ...dispose,
+        //     Gen: messageStatusTransformer.Gen,
+        //     Status: messageStatusTransformer.Status,
+        //     Unique: messageStatusTransformer.Unique
+        // }, undefined);
     }
 }
 export const IStatusMachine = createDecorator<IStatusMachine>('IStatusMachine');
@@ -89,7 +108,7 @@ export const IStatusMachine = createDecorator<IStatusMachine>('IStatusMachine');
 // 与状态的 对应关系 , 
 // 消息来了-> 构建状态 =》 状态转移 action 
 // 状态迁移 =》 继续处理
-export class StateMachines implements IStatusMachine {
+export class StateMachinesServer implements IStatusMachine {
     constructor(
         /* @INetServer netServer, */
         /* @ILogServer logServer */

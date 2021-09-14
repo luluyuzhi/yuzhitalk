@@ -1,8 +1,8 @@
-import { TLSSocket } from 'tls';
 import { createDecorator } from 'yuzhi/instantiation/common/instantiation';
+import { Role } from '../core/server';
 import {
     yuzhitalkproto as YuzhitalkProto, MessageType, TransfromText, TransfromFile,
-    TransfromImage, TransfromVoice, decodeyuzhitalkproto, TransfromNotify, TransfromPosition, TransfromVideo, yuzhitalkproto
+    TransfromImage, TransfromVoice, decodeyuzhitalkproto, TransfromNotify, TransfromPosition, TransfromVideo, yuzhitalkproto, encodeMessageType
 } from './normal';
 import { IProtocolCollocationServer, MessageStatusTransformer } from './statemachines';
 
@@ -78,10 +78,11 @@ export class ProtocolHockServer implements IProtocolHock {
 
 export interface IProtocol {
     readonly _serviceBrand: undefined;
-    handleProtocol(content: Buffer, socket: TLSSocket): void;
+    handleProtocol(content: Buffer, socket: Role): void;
 }
 
 export const IProtocol = createDecorator<IProtocol>('yuzhiProtocol');
+
 
 export class Protocol implements IProtocol {
     declare _serviceBrand: undefined;
@@ -90,15 +91,16 @@ export class Protocol implements IProtocol {
         @IProtocolHock private protocol: IProtocolHock,
         @IProtocolCollocationServer private collocationServer: IProtocolCollocationServer
     ) { }
-    public handleProtocol(content: Buffer, socket: TLSSocket) {
+    public handleProtocol(content: Buffer, socket: Role) {
 
         let yuzhiProtocol = this.decode(content);
+
         if (!yuzhiProtocol) {
-            socket.write(Buffer.from("fail", 'ascii'));
             return;
         }
+
+
         this.collocationServer.handleSource(yuzhiProtocol);
-        let messageStatusTransformer: MessageStatusTransformer = new MessageStatusTransformer(yuzhiProtocol, 0);
     }
 
     private decode(content: Buffer): YuzhitalkProto | undefined {

@@ -7,7 +7,6 @@ class UserService implements IUserService {
 
     constructor(@IUserManagerServerIDNumber private userManageruserService: UserManagerServer<number>) { }
 
-
     sendMessage(id: number, message: string): void {
         throw new Error('Method not implemented.');
         // this.userManageruserService.getUser(id).sendMessage(message);

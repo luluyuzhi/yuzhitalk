@@ -10,7 +10,6 @@ class GroupService implements IGroupService {
 
     constructor( @IUserManagerServerIDNumber private userManagerServer: UserManagerServer<number>) {}
     
-    
     sendMessage(id: number, message: string): void {
         throw new Error('Method not implemented.');
         // this.userManagerServer.getUser(id).sendMessage(message);

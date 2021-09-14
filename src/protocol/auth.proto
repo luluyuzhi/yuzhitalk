@@ -1,0 +1,19 @@
+message AuthToken
+{
+    required string token =1;
+}
+
+enum EAuthType 
+{
+    option allow_alias = true;
+    PHONE =0;
+    EMAIL =1;
+    ACCOUNT =2;
+}
+message AuthUser 
+{
+    required string authUserAccount =1;
+    required string secretKey =2;
+    required EAuthType authType = 3 [default = PHONE];
+    optional string other = 4;
+}

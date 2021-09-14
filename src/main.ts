@@ -18,16 +18,16 @@ class CoreMain {
 
     private async startup(): Promise<void> {
         const instantiationService = this.createServices();
-        instantiationService.invokeFunction((accessor) =>{
+        instantiationService.invokeFunction((accessor) => {
             instantiationService.createInstance(NetService, options).Start();
         });
     }
 
     private createServices(): IInstantiationService {
         let collection = new ServiceCollection();
-        collection.set(IProtocolHock, new SyncDescriptor<IProtocolHock>(ProtocolHockServer))
+        collection.set(IProtocolHock, new SyncDescriptor<IProtocolHock>(ProtocolHockServer));
         collection.set(IProtocol, new SyncDescriptor<IProtocol>(Protocol));
-        collection.set(IProtocolCollocationServer, new SyncDescriptor<IProtocolCollocationServer>(ProtocolCollocationServer))
+        collection.set(IProtocolCollocationServer, new SyncDescriptor<IProtocolCollocationServer>(ProtocolCollocationServer));
         return new InstantiationService(collection);
     }
 }
