@@ -23,3 +23,7 @@ message AuthUser
     required AuthToken secretKey =2;
     required EAuthType authType = 3 [default = PHONE];
 }
+
+service Cats {
+    rpc Auth (AuthToken) returns (AuthStatus) {}
+}

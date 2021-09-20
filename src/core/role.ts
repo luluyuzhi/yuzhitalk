@@ -11,3 +11,17 @@ export class Role {
 
   auth() {}
 }
+
+
+export class Connector {
+
+  constructor(private socket: TLSSocket) {}
+  isAuthed: boolean = false;
+
+  get Authed() {
+    return this.isAuthed;
+  }
+
+  auth() {}
+
+}
