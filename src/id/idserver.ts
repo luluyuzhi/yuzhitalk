@@ -1,12 +1,9 @@
-
 export interface IIdServer {
-
-    gen();
+  gen();
 }
 
 export abstract class IdService implements IIdServer {
+  constructor() {}
 
-    constructor() { }
-
-    abstract gen();
+  abstract gen();
 }

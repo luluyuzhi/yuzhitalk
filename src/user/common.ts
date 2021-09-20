@@ -1,4 +1,4 @@
 export interface ICommonProps {
-    sendMessage(id: number, message: string): void;
-    recallMessage(id: number): void;
+  sendMessage(id: number, message: string): void;
+  recallMessage(id: number): void;
 }

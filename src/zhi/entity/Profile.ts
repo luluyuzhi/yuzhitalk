@@ -13,7 +13,7 @@ export class Profile {
 
   @Column()
   birthday: Date;
-  
+
   @Column()
   age: number;
 

@@ -1,24 +1,34 @@
-import * as  tls from 'tls';
-import * as fs from 'fs';
-import * as pbjs from 'pbjs';
-import { encodeyuzhitalkproto, intToLong, MessageType, yuzhitalkproto, Long } from './protocol/normal';
+import * as tls from "tls";
+import * as fs from "fs";
+import * as pbjs from "pbjs";
+import {
+  encodeyuzhitalkproto,
+  intToLong,
+  MessageType,
+  yuzhitalkproto,
+  Long,
+} from "./protocol/normal";
 
-const schema = pbjs.parseSchema(`
+const schema = pbjs
+  .parseSchema(
+    `
   message Demo {
     optional int32 x = 1;
     optional float y = 2;
   }
-`).compile();
+`
+  )
+  .compile();
 
 const options = {
-  key: fs.readFileSync('./tlsCa/ryans-key.pem'),
-  cert: fs.readFileSync('./tlsCa/ryans-cert.pem'),
+  key: fs.readFileSync("./tlsCa/ryans-key.pem"),
+  cert: fs.readFileSync("./tlsCa/ryans-cert.pem"),
   // This is necessary only if using the client certificate authentication.
   requestCert: false,
   strictSSL: false,
   rejectUnauthorized: false,
   // This is necessary only if the client uses the self-signed certificate.
-  ca: [fs.readFileSync('./tlsCa/ryans-csr.pem')]
+  ca: [fs.readFileSync("./tlsCa/ryans-csr.pem")],
 };
 
 function filling(buffer: Buffer | Uint8Array) {
@@ -28,8 +38,10 @@ function filling(buffer: Buffer | Uint8Array) {
 }
 
 const socket = tls.connect(8080, options, () => {
-  console.log('client connected',
-    socket.authorized ? 'authorized' : 'unauthorized');
+  console.log(
+    "client connected",
+    socket.authorized ? "authorized" : "unauthorized"
+  );
   let test = {
     messageType: MessageType.Text,
     timestamp: intToLong(123),
@@ -37,8 +49,8 @@ const socket = tls.connect(8080, options, () => {
     statustransto: intToLong(18630977388),
     id: intToLong(1),
     transfromtext: {
-      contents: "one word"
-    }
+      contents: "one word",
+    },
   } as yuzhitalkproto;
   let buf = encodeyuzhitalkproto(test);
 
@@ -48,12 +60,9 @@ const socket = tls.connect(8080, options, () => {
 });
 
 // socket.setEncoding('utf8');
-socket.on('data', (data) => {
+socket.on("data", (data) => {
   const message = schema.decodeDemo(data);
 
   console.log(message);
 });
-socket.on('end', () => {
-
-});
-
+socket.on("end", () => {});
