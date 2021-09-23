@@ -1,8 +1,8 @@
 import { IDisposable } from "yuzhi/common/lifecycle";
 import { Event, Emitter } from "yuzhi/common/event";
 import { IUnique } from "yuzhi/utility/SelfDictionary";
-import { Socket } from "net";
 import { ICycleElem } from "../utility/cycle";
+import { Connector } from '../core/connector';
 
 interface IContentHandler {
   handle(status: string): void;
@@ -18,7 +18,8 @@ export interface ICommonPropsHandler<T>
 // 3. user 不一定与 当前在线用户 一一对应 ，可以是一个离线用户，也可以是一个在线用户。 因此 它有可能具有临时状态。
 // 4. user 属于谁， user 属于 userServer
 export class User<T> implements ICommonPropsHandler<T> {
-  constructor(private readonly userId: T, private socket: Socket) {}
+  constructor(private readonly userId: T, 
+    private connector: Connector) {}
 
   handle(status: string): void {
     throw new Error("Method not implemented.");
@@ -29,7 +30,7 @@ export class User<T> implements ICommonPropsHandler<T> {
   }
 
   dispose(): void {
-    this.socket.end();
+    this.connector.Disconnect();
   }
 }
 

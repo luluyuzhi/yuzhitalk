@@ -5,8 +5,9 @@ import { IInstantiationService } from "yuzhi/instantiation/common/instantiation"
 import { IUnique, SelfDictionary } from "yuzhi/utility/SelfDictionary";
 import { ServiceCollection } from "../instantiation/common/serviceCollection";
 import { SyncDescriptor } from "../instantiation/common/descriptors";
+import { Connector } from '../core/connector';
 
-enum MessageStatus {
+export enum MessageStatus {
   SendMsgRequest,
   SendMsgNotify,
   ReceiveMsgNotify,
@@ -20,7 +21,7 @@ interface IStatusImpl {
   Status: () => MessageStatus;
 }
 
-interface IStatus extends IDisposable, IStatusImpl, IUnique<number> {}
+interface IStatus extends IDisposable, IStatusImpl, IUnique<number> { }
 
 export class MessageStatusTransformer implements IStatusImpl {
   constructor(
@@ -28,7 +29,7 @@ export class MessageStatusTransformer implements IStatusImpl {
     private id: number,
     private messageType_: MessageType = content.messageType,
     private messageStatus: MessageStatus = MessageStatus.SendMsgRequest
-  ) {}
+  ) { }
 
   Unique(): number {
     return this.id;
@@ -52,7 +53,7 @@ interface IStatusMachine {
 }
 
 export interface IProtocolCollocationServer {
-  handleSource(content: yuzhitalkproto): any;
+  handleSource(content: yuzhitalkproto, connector: Connector): any;
 }
 
 export const IProtocolCollocationServer =
@@ -64,7 +65,7 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
   private subInstantiationService = this.createServices();
   constructor(
     @IInstantiationService private InstantiationService: IInstantiationService
-  ) {}
+  ) { }
 
   private createServices(): IInstantiationService {
     let collection = new ServiceCollection();
@@ -75,7 +76,7 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
     return this.InstantiationService.createChild(collection);
   }
 
-  handleSource(content: yuzhitalkproto /*socket*/) {
+  handleSource(content: yuzhitalkproto, connector: Connector) {
     this.subInstantiationService.invokeFunction((accessor) => {
       const statusMachine = accessor.get(IStatusMachine);
       //1. 查表， 如果在的话就 继续处理
@@ -122,7 +123,7 @@ export class StateMachinesServer implements IStatusMachine {
     /* @INetServer netServer, */
     /* @ILogServer logServer */
     @IProtocolCollocationServer protocolCollocationServer
-  ) {}
+  ) { }
 
   public initStatus(status: IStatus, box = status.Gen()) {
     box.next();

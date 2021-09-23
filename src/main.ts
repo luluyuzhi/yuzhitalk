@@ -15,6 +15,7 @@ import {
   ProtocolCollocationServer,
 } from "yuzhi/protocol/statemachines";
 import * as dotenv from "dotenv";
+import { IRemoteAuthServer, RemoteAuthServer } from "./outlet/client";
 
 dotenv.config();
 
@@ -46,6 +47,8 @@ class CoreMain {
       IProtocolCollocationServer,
       new SyncDescriptor<IProtocolCollocationServer>(ProtocolCollocationServer)
     );
+
+    collection.set(IRemoteAuthServer, new RemoteAuthServer());
     return new InstantiationService(collection);
   }
 }

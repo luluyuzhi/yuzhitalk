@@ -1,5 +1,5 @@
 import { createDecorator } from "yuzhi/instantiation/common/instantiation";
-import { Role } from "../core/role";
+import { Connector } from "../core/connector";
 import {
   yuzhitalkproto as YuzhitalkProto,
   MessageType,
@@ -91,7 +91,7 @@ export class ProtocolHockServer implements IProtocolHock {
 
 export interface IProtocol {
   readonly _serviceBrand: undefined;
-  handleProtocol(content: Buffer, socket: Role): void;
+  handleProtocol(content: Buffer, socket: Connector): void;
 }
 
 export const IProtocol = createDecorator<IProtocol>("yuzhiProtocol");
@@ -104,14 +104,14 @@ export class Protocol implements IProtocol {
     @IProtocolCollocationServer
     private collocationServer: IProtocolCollocationServer
   ) {}
-  public handleProtocol(content: Buffer, socket: Role) {
+  public handleProtocol(content: Buffer, connector: Connector) {
     let yuzhiProtocol = this.decode(content);
 
     if (!yuzhiProtocol) {
       return;
     }
 
-    this.collocationServer.handleSource(yuzhiProtocol);
+    this.collocationServer.handleSource(yuzhiProtocol, connector);
   }
 
   private decode(content: Buffer): YuzhitalkProto | undefined {
