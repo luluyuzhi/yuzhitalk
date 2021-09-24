@@ -23,7 +23,7 @@ export class SelfDictionary<U, T extends IUnique<U>> {
     return this.map.has(key.Unique());
   }
 
-  public get(key: U) {
+  public get(key: U): T {
     return this.map.get(key);
   }
 }

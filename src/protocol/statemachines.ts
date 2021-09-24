@@ -1,12 +1,19 @@
-import { yuzhitalkproto, MessageType } from "./normal";
+import {
+  yuzhitalkproto,
+  MessageType,
+  intToLong,
+  encodeyuzhitalkproto,
+} from "./normal";
 import { IDisposable } from "yuzhi/common/lifecycle";
 import { createDecorator } from "yuzhi/instantiation/common/instantiation";
 import { IInstantiationService } from "yuzhi/instantiation/common/instantiation";
 import { IUnique, SelfDictionary } from "yuzhi/utility/SelfDictionary";
-import { ServiceCollection } from "../instantiation/common/serviceCollection";
-import { SyncDescriptor } from "../instantiation/common/descriptors";
-import { Connector } from '../core/connector';
-
+import { ServiceCollection } from "yuzhi/instantiation/common/serviceCollection";
+import { SyncDescriptor } from "yuzhi/instantiation/common/descriptors";
+import { Connector } from "yuzhi/core/connector";
+import * as schedule from "node-schedule";
+import { UriProtocolServerUserChat } from "yuzhi/uri";
+import { Itransfromto } from "yuzhi/message/messageTranstoServer";
 export enum MessageStatus {
   SendMsgRequest,
   SendMsgNotify,
@@ -21,15 +28,31 @@ interface IStatusImpl {
   Status: () => MessageStatus;
 }
 
-interface IStatus extends IDisposable, IStatusImpl, IUnique<number> { }
+interface IException {
+  abort: () => void;
+  disconnect: () => void;
+}
 
-export class MessageStatusTransformer implements IStatusImpl {
+interface IStatus extends IDisposable, IStatusImpl, IUnique<number> {
+  target: number;
+  package: any;
+}
+
+export class MessageStatusTransformer
+  implements IStatusImpl, IException, IUnique<number>
+{
   constructor(
     private content: yuzhitalkproto,
     private id: number,
+    private connector: Connector,
     private messageType_: MessageType = content.messageType,
     private messageStatus: MessageStatus = MessageStatus.SendMsgRequest
-  ) { }
+  ) {}
+
+  abort() {}
+  disconnect() {
+    this.connector.Disconnect();
+  }
 
   Unique(): number {
     return this.id;
@@ -48,8 +71,12 @@ export class MessageStatusTransformer implements IStatusImpl {
   }
 }
 interface IStatusMachine {
-  initStatus(status: IStatus, box: unknown): void;
-  StatusHandler(messageStatus: MessageStatus): void;
+  initStatus(status: IStatus, connector: Connector): IStatus;
+  StatusHandler(
+    status: IStatus,
+    connector: Connector,
+    messageStatus: MessageStatus
+  ): void;
 }
 
 export interface IProtocolCollocationServer {
@@ -63,9 +90,19 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
   declare readonly _serviceBrand: undefined;
   private selfDictionary = new SelfDictionary();
   private subInstantiationService = this.createServices();
+  private messages = [];
   constructor(
     @IInstantiationService private InstantiationService: IInstantiationService
-  ) { }
+  ) {
+    schedule.scheduleJob("50 * * * * *", () => {
+      console.log("scheduleJob: messages clear");
+      this.messages.forEach((item) => {
+        if (item.time.getTime() + 1000 * 60 * 10 < new Date().getTime()) {
+          item.dispose();
+        }
+      });
+    });
+  }
 
   private createServices(): IInstantiationService {
     let collection = new ServiceCollection();
@@ -79,38 +116,33 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
   handleSource(content: yuzhitalkproto, connector: Connector) {
     this.subInstantiationService.invokeFunction((accessor) => {
       const statusMachine = accessor.get(IStatusMachine);
-      //1. 查表， 如果在的话就 继续处理
-      //2. 不在就加入
-
       if (
         ![MessageType.Ack, MessageType.Notify].includes(content.messageType)
       ) {
-        let messageStatusTransformer = new MessageStatusTransformer(content, 0);
-        let dispose = this.selfDictionary.set(messageStatusTransformer);
-        statusMachine.initStatus(
+        const messageStatusTransformer = new MessageStatusTransformer(
+          content,
+          0,
+          connector
+        );
+
+        const status = statusMachine.initStatus(
           {
-            ...dispose,
+            dispose: messageStatusTransformer.abort,
             Gen: messageStatusTransformer.Gen,
             Status: messageStatusTransformer.Status,
             Unique: messageStatusTransformer.Unique,
+            target: content.statustransto.low,
+            package: content,
           },
-          undefined
+          connector
         );
+        const dispose = this.selfDictionary.set(status);
+        this.messages.push({ dispose: dispose.dispose, time: new Date() });
+      } else {
+        const status = this.selfDictionary.get(0) as IStatus;
+        statusMachine.StatusHandler(status, connector, status.Status());
       }
     });
-  }
-
-  join(content: yuzhitalkproto) {
-    //1. 查表， 如果在的话就 继续处理
-    //2. 不在就加入
-    let messageStatusTransformer = new MessageStatusTransformer(content, 0);
-    let dispose = this.selfDictionary.set(messageStatusTransformer);
-    // this.statusMachine.initStatus({
-    //     ...dispose,
-    //     Gen: messageStatusTransformer.Gen,
-    //     Status: messageStatusTransformer.Status,
-    //     Unique: messageStatusTransformer.Unique
-    // }, undefined);
   }
 }
 export const IStatusMachine = createDecorator<IStatusMachine>("IStatusMachine");
@@ -122,23 +154,38 @@ export class StateMachinesServer implements IStatusMachine {
   constructor(
     /* @INetServer netServer, */
     /* @ILogServer logServer */
-    @IProtocolCollocationServer protocolCollocationServer
-  ) { }
+    @IProtocolCollocationServer protocolCollocationServer,
+    @Itransfromto private messageTransfromto: Itransfromto
+  ) {}
 
-  public initStatus(status: IStatus, box = status.Gen()) {
+  public initStatus(status: IStatus, connector: Connector, box = status.Gen()) {
     box.next();
-    this.StatusHandler(status.Status());
+    this.StatusHandler(status, connector);
+    return status;
   }
 
-  public StatusHandler(messageStatus: MessageStatus) {
+  public StatusHandler(
+    status: IStatus,
+    connector: Connector,
+    messageStatus: MessageStatus = status.Status()
+  ) {
     switch (messageStatus) {
       case MessageStatus.SendMsgNotify: {
+        const ack = {
+          messageType: MessageType.Ack,
+          timestamp: intToLong(Date.now().valueOf()),
+          statustransfrom: intToLong(0),
+          statustransto: intToLong(0),
+        } as yuzhitalkproto;
+        connector.send(Buffer.from(encodeyuzhitalkproto(ack)));
         //!!! 不需要服务器保证
         // 网络请求-》 通知用户 A 你的消息我已经接收到了
         // 调用 MessageStatusTransformer.next(); 进入下一状态
         // StatusHandler(继续处理);
       }
       case MessageStatus.ReceiveMsgNotify: {
+        const uri = UriProtocolServerUserChat(status.target);
+        this.messageTransfromto.transfromto(uri, status.package);
         //!!!
         // 把消息通知 到 B
         // 调用 MessageStatusTransformer.next(); 进入下一状态

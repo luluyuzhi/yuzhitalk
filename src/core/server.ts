@@ -53,9 +53,9 @@ export class NetService extends ServerImp implements IServer {
 
         !connector.Authed
           ? protocol.handleProtocol(message.subarray(1), connector)
-          : connector.auth().then((value=>{
-            console.log(value);
-          }));
+          : connector.auth().then((value) => {
+              console.log(value);
+            });
       });
 
       socket.on("error", function (e: Error) {

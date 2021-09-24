@@ -65,4 +65,6 @@ socket.on("data", (data) => {
 
   console.log(message);
 });
-socket.on("end", () => {});
+socket.on("end", () => {
+  console.log("server disconnect!");
+});

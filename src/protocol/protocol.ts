@@ -105,12 +105,10 @@ export class Protocol implements IProtocol {
     private collocationServer: IProtocolCollocationServer
   ) {}
   public handleProtocol(content: Buffer, connector: Connector) {
-    let yuzhiProtocol = this.decode(content);
-
+    const yuzhiProtocol = this.decode(content);
     if (!yuzhiProtocol) {
       return;
     }
-
     this.collocationServer.handleSource(yuzhiProtocol, connector);
   }
 
