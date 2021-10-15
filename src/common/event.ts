@@ -391,7 +391,7 @@ export namespace Event {
   }
 
   class ChainableEvent<T> implements IChainableEvent<T> {
-    constructor(readonly event: Event<T>) {}
+    constructor(readonly event: Event<T>) { }
 
     map<O>(fn: (i: T) => O): IChainableEvent<O> {
       return new ChainableEvent(map(this.event, fn));
@@ -556,10 +556,8 @@ class EventProfiling {
       this._invocationCount += 1;
 
       console.info(
-        `did FIRE ${this._name}: elapsed_ms: ${elapsed.toFixed(5)}, listener: ${
-          this._listenerCount
-        } (elapsed_overall: ${this._elapsedOverall.toFixed(2)}, invocations: ${
-          this._invocationCount
+        `did FIRE ${this._name}: elapsed_ms: ${elapsed.toFixed(5)}, listener: ${this._listenerCount
+        } (elapsed_overall: ${this._elapsedOverall.toFixed(2)}, invocations: ${this._invocationCount
         })`
       );
       this._stopWatch = undefined;
@@ -585,7 +583,7 @@ class LeakageMonitor {
   constructor(
     readonly customThreshold?: number,
     readonly name: string = Math.random().toString(18).slice(2, 5)
-  ) {}
+  ) { }
 
   dispose(): void {
     if (this._stacks) {
@@ -643,25 +641,25 @@ class LeakageMonitor {
  * The Emitter can be used to expose an Event to the public
  * to fire it from the insides.
  * Sample:
-	class Document {
+  class Document {
 
-		private readonly _onDidChange = new Emitter<(value:string)=>any>();
+    private readonly _onDidChange = new Emitter<(value:string)=>any>();
 
-		public onDidChange = this._onDidChange.event;
+    public onDidChange = this._onDidChange.event;
 
-		// getter-style
-		// get onDidChange(): Event<(value:string)=>any> {
-		// 	return this._onDidChange.event;
-		// }
+    // getter-style
+    // get onDidChange(): Event<(value:string)=>any> {
+    // 	return this._onDidChange.event;
+    // }
 
-		private _doIt() {
-			//...
-			this._onDidChange.fire(value);
-		}
-	}
+    private _doIt() {
+      //...
+      this._onDidChange.fire(value);
+    }
+  }
  */
 export class Emitter<T> {
-  private static readonly _noop = function () {};
+  private static readonly _noop = function () { };
 
   private readonly _options?: EmitterOptions;
   private readonly _leakageMon?: LeakageMonitor;
@@ -676,8 +674,8 @@ export class Emitter<T> {
     this._leakageMon =
       _globalLeakWarningThreshold > 0
         ? new LeakageMonitor(
-            this._options && this._options.leakWarningThreshold
-          )
+          this._options && this._options.leakWarningThreshold
+        )
         : undefined;
     this._perfMon = this._options?._profName
       ? new EventProfiling(this._options._profName)
@@ -813,7 +811,7 @@ export class PauseableEmitter<T> extends Emitter<T> {
   private _eventQueue = new LinkedList<T>();
   private _mergeFn?: (input: T[]) => T;
 
-  constructor(options?: EmitterOptions & { merge?: (input: T[]) => T }) {
+  constructor(options?: EmitterOptions & { merge?: (input: T[]) => T; }) {
     super(options);
     this._mergeFn = options?.merge;
   }
@@ -854,7 +852,7 @@ export class PauseableEmitter<T> extends Emitter<T> {
 export class EventMultiplexer<T> implements IDisposable {
   private readonly emitter: Emitter<T>;
   private hasListeners = false;
-  private events: { event: Event<T>; listener: IDisposable | null }[] = [];
+  private events: { event: Event<T>; listener: IDisposable | null; }[] = [];
 
   constructor() {
     this.emitter = new Emitter<T>({
@@ -897,11 +895,11 @@ export class EventMultiplexer<T> implements IDisposable {
     this.events.forEach((e) => this.unhook(e));
   }
 
-  private hook(e: { event: Event<T>; listener: IDisposable | null }): void {
+  private hook(e: { event: Event<T>; listener: IDisposable | null; }): void {
     e.listener = e.event((r) => this.emitter.fire(r));
   }
 
-  private unhook(e: { event: Event<T>; listener: IDisposable | null }): void {
+  private unhook(e: { event: Event<T>; listener: IDisposable | null; }): void {
     if (e.listener) {
       e.listener.dispose();
     }
