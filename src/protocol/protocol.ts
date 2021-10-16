@@ -97,7 +97,7 @@ export interface IProtocol {
 export const IProtocol = createDecorator<IProtocol>("yuzhiProtocol");
 
 export class Protocol implements IProtocol {
-  declare _serviceBrand: undefined;
+  declare readonly _serviceBrand: undefined;
 
   constructor(
     @IProtocolHock private protocol: IProtocolHock,

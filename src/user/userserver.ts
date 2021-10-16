@@ -1,16 +1,29 @@
+import { createDecorator } from 'yuzhi/instantiation/common/instantiation';
 import { ICommonProps } from "./common";
+import { User } from './user';
 import {
-  IUserManagerServerIDNumber,
-  UserManagerServer,
+  IUserManagerServer,
+  // IUserManagerServerIDNumber,
 } from "./UserManagerServer";
 
-interface IUserService extends ICommonProps {}
+export interface IUserService extends ICommonProps {
+  readonly _serviceBrand: undefined;
+}
 
-class UserService implements IUserService {
+export const IUserService = createDecorator<IUserService>("IUserService");
+
+export class UserService implements IUserService {
+
+  declare readonly _serviceBrand: undefined;
+
   constructor(
-    @IUserManagerServerIDNumber
-    private userManageruserService: UserManagerServer<number>
-  ) {}
+    @IUserManagerServer private userManageruserService: IUserManagerServer<number>
+  ) { }
+
+
+  getUser(id: number): Promise<User<number>> {
+    throw new Error('Method not implemented.');
+  }
 
   sendMessage(id: number, message: string): void {
     throw new Error("Method not implemented.");
@@ -23,4 +36,4 @@ class UserService implements IUserService {
   }
 }
 
-export = UserService;
+

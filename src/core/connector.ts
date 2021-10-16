@@ -4,16 +4,17 @@ import { IRemoteAuthServer } from "yuzhi/outlet/client";
 import { User } from "yuzhi/user/user";
 
 export interface IConnector {
-  auth(): Promise<boolean>;
+  auth(s: Buffer): Promise<boolean>;
   Disconnect(): void;
 }
 
 export class Connector implements IConnector {
+
   public constructor(
     private socket: TLSSocket,
     @IRemoteAuthServer private remoteAuthServer: IRemoteAuthServer,
     @IInstantiationService private instantiationService: IInstantiationService // @IAuthServer private authServer: IAuthServer // @IUserService userService
-  ) {}
+  ) { }
 
   public user?: User<number>;
 
@@ -30,10 +31,14 @@ export class Connector implements IConnector {
     });
   }
 
-  async auth(): Promise<boolean> {
+  async auth(s: Buffer): Promise<boolean> {
     try {
-      const t = await this.remoteAuthServer.authAsync({ token: "123" });
-      this.user = new User(6, this);
+      const token = this.remoteAuthServer.decodeAuthToken(s);
+      const authStatus = await this.remoteAuthServer.authAsync(token);
+      if (authStatus.code.low == 0) {
+        return true;
+      }
+      this.user = this.instantiationService.createInstance(User, 6, this);
     } catch {
       this.socket.end();
       return false;

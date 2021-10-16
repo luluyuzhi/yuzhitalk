@@ -3,6 +3,7 @@ import { GrpcObject, loadPackageDefinition, credentials } from "@grpc/grpc-js";
 import {
   AuthStatus as IAuthStatus,
   AuthToken as IAuthToken,
+  decodeAuthToken,
 } from "../../protocol/auth";
 import * as protoLoader from "@grpc/proto-loader";
 import * as path from "path";
@@ -12,10 +13,13 @@ export interface IRemoteAuthServer {
   readonly _serviceBrand: undefined;
   auth(authToken: IAuthToken): IAuthStatus;
   authAsync(authToken: IAuthToken): Promise<IAuthStatus>;
+  decodeAuthToken(authToken: Uint8Array): IAuthToken;
 }
+
 export const IRemoteAuthServer =
   createDecorator<IRemoteAuthServer>("RemoteAuthServer");
 export class RemoteAuthServer implements IRemoteAuthServer {
+
   declare readonly _serviceBrand: undefined;
   private static readonly PROTO_PATH = path.join(__dirname, "auth.proto");
   private static packageDefinition = protoLoader.loadSync(
@@ -31,6 +35,7 @@ export class RemoteAuthServer implements IRemoteAuthServer {
   private protoDescriptor = loadPackageDefinition(
     RemoteAuthServer.packageDefinition
   ).Auth;
+
   private client = new ((this.protoDescriptor as GrpcObject)[
     "Cat"
   ] as ServiceClientConstructor)(
@@ -52,5 +57,9 @@ export class RemoteAuthServer implements IRemoteAuthServer {
 
   public auth(authToken: IAuthToken): IAuthStatus {
     throw new Error("Method not implemented.");
+  }
+
+  public decodeAuthToken(authToken: Uint8Array): IAuthToken {
+    return decodeAuthToken(authToken);
   }
 }

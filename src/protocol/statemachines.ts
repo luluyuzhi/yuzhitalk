@@ -14,6 +14,7 @@ import { Connector } from "yuzhi/core/connector";
 import * as schedule from "node-schedule";
 import { UriProtocolServerUserChat } from "yuzhi/uri";
 import { Itransfromto } from "yuzhi/message/messageTranstoServer";
+
 export enum MessageStatus {
   SendMsgRequest,
   SendMsgNotify,
@@ -47,9 +48,9 @@ export class MessageStatusTransformer
     private connector: Connector,
     private messageType_: MessageType = content.messageType,
     private messageStatus: MessageStatus = MessageStatus.SendMsgRequest
-  ) {}
+  ) { }
 
-  abort() {}
+  abort() { }
   disconnect() {
     this.connector.Disconnect();
   }
@@ -156,7 +157,7 @@ export class StateMachinesServer implements IStatusMachine {
     /* @ILogServer logServer */
     @IProtocolCollocationServer protocolCollocationServer,
     @Itransfromto private messageTransfromto: Itransfromto
-  ) {}
+  ) { }
 
   public initStatus(status: IStatus, connector: Connector, box = status.Gen()) {
     box.next();
