@@ -3,9 +3,6 @@ import * as URI from "uri-js";
 // lulu://sendtype:group@yuzhi.com:{id}/
 // lulu://sendtype:person@yuzhi.com:{id}/
 
-
-
-
 export class UriProtocolServer {
   static createServices<T>(
     userid: T,

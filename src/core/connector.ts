@@ -1,7 +1,7 @@
 import { TLSSocket } from "tls";
 import { IInstantiationService } from "yuzhi/instantiation/common/instantiation";
 import { IRemoteAuthServer } from "yuzhi/outlet/client";
-import { User } from "yuzhi/user/user";
+import { User } from "yuzhi/user/User";
 
 export interface IConnector {
   auth(s: Buffer): Promise<boolean>;
@@ -9,12 +9,11 @@ export interface IConnector {
 }
 
 export class Connector implements IConnector {
-
   public constructor(
     private socket: TLSSocket,
     @IRemoteAuthServer private remoteAuthServer: IRemoteAuthServer,
     @IInstantiationService private instantiationService: IInstantiationService // @IAuthServer private authServer: IAuthServer // @IUserService userService
-  ) { }
+  ) {}
 
   public user?: User<number>;
 

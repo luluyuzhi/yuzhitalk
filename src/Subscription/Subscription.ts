@@ -1,46 +1,55 @@
-import { User } from 'yuzhi/user/user';
-import { IUserService } from 'yuzhi/user/UserServer';
-import { Emitter, Event } from '../common/event';
+import { User } from "yuzhi/user/User";
+import { IUserService } from "yuzhi/user/server/UserServer";
+import { Emitter, Event } from "../common/event";
+import * as URI from "uri-js";
+import { IUnique } from "yuzhi/utility/SelfDictionary";
+import { ISubscriptionServer } from "./SubscriptionServer";
+import { Message } from "../message/message";
+import { MaxPriorityQueue } from "datastructures-js";
 
-export interface ISubscription {
-
-    addUser(user: number | User<number>);
-    removeUser(user: number);
-    sendMessage(message: string);
-
+// lulu://sendtype:group@yuzhi.com:{id}/
+// lulu://sendtype:person@yuzhi.com:{id}/
+export interface ISubscription extends IUnique<number> {
+  readonly subscript: string;
+  type(): string;
+  handle(id: Long): void;
+  addMessage(message: Message): void;
 }
 
-export class Subscription implements ISubscription {
+export abstract class Subscription implements ISubscription {
+  private id: number;
+  private readonly subscripturi: URI.URIComponents;
 
-    declare readonly _serviceBrand: undefined;
+  private messages: MaxPriorityQueue<Message>;
+  private _m: Map<Long, Message> = new Map();
+  public constructor(
+    // lulu://group:subscription@chat.yuzhi.com:{id}/
+    readonly subscript: string,
+    // @IUserService private userService: IUserService
+    @ISubscriptionServer protected subscriptionServer: ISubscriptionServer
+  ) {
+    this.subscripturi = URI.parse(subscript);
+    this.id = Number(this.subscripturi.host);
+    this.messages = new MaxPriorityQueue<Message>({
+      compare: (a, b) => { return a.Unique().compare(b.Unique()); }
+    });
+    this.subscriptionServer.addSubscription(this);
+  }
 
-  c
+  addMessage(message: Message): void {
+    this._m.set(message.Unique(), message);
+    this.messages.enqueue(message);
+  }
 
-    public constructor(
-        private id: number,
-        @IUserService private userService: IUserService
-    ) { }
+  handle(id: Long): void {
+    const msg = this._m.get(id);
+  }
 
-    private users: (number | User<number>)[] = [];
+  type(): string {
+    return this.subscripturi.path;
+  }
 
-    addUser(user: number | User<number>) {
-        this.users.push(user);
-    }
-
-    removeUser(user: number) {
-        this.users = this.users.splice(this.users.indexOf(user), 1);
-    }
-
-    sendMessage(message: string) {
-        this.users.forEach(async user => {
-            if (user instanceof User) {
-                user.handle(message);
-            } else {
-                const userObj = await this.userService.getUser(<number><unknown>user);
-                this.users.splice(this.users.indexOf(user), 1);
-                this.users.push(userObj);
-                userObj.handle(message);
-            }
-        });
-    }
+  Unique() {
+    return this.id;
+  }
 }

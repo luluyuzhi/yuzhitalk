@@ -3,41 +3,41 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-
 declare const global: unknown;
 declare const self: unknown;
 
-export const globals: any = (typeof self === 'object' ? self : typeof global === 'object' ? global : {});
-const hasPerformanceNow = (globals.performance && typeof globals.performance.now === 'function');
+export const globals: any =
+  typeof self === "object" ? self : typeof global === "object" ? global : {};
+const hasPerformanceNow =
+  globals.performance && typeof globals.performance.now === "function";
 
 export class StopWatch {
+  private _highResolution: boolean;
+  private _startTime: number;
+  private _stopTime: number;
 
-	private _highResolution: boolean;
-	private _startTime: number;
-	private _stopTime: number;
+  public static create(highResolution: boolean = true): StopWatch {
+    return new StopWatch(highResolution);
+  }
 
-	public static create(highResolution: boolean = true): StopWatch {
-		return new StopWatch(highResolution);
-	}
+  constructor(highResolution: boolean) {
+    this._highResolution = hasPerformanceNow && highResolution;
+    this._startTime = this._now();
+    this._stopTime = -1;
+  }
 
-	constructor(highResolution: boolean) {
-		this._highResolution = hasPerformanceNow && highResolution;
-		this._startTime = this._now();
-		this._stopTime = -1;
-	}
+  public stop(): void {
+    this._stopTime = this._now();
+  }
 
-	public stop(): void {
-		this._stopTime = this._now();
-	}
+  public elapsed(): number {
+    if (this._stopTime !== -1) {
+      return this._stopTime - this._startTime;
+    }
+    return this._now() - this._startTime;
+  }
 
-	public elapsed(): number {
-		if (this._stopTime !== -1) {
-			return this._stopTime - this._startTime;
-		}
-		return this._now() - this._startTime;
-	}
-
-	private _now(): number {
-		return this._highResolution ? globals.performance.now() : Date.now();
-	}
+  private _now(): number {
+    return this._highResolution ? globals.performance.now() : Date.now();
+  }
 }

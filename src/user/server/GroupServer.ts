@@ -1,18 +1,16 @@
-import { ICommonProps } from "./common";
-import { User } from './user';
-import {
-  IUserManagerServer,
-} from "./UserManagerServer";
+import { ICommonProps } from "../common";
+import { User } from "../User";
+import { IUserManagerServer } from "./UserManagerServer";
 
-interface IGroupService extends ICommonProps { }
+interface IGroupService extends ICommonProps {}
 
 class GroupService implements IGroupService {
   constructor(
     @IUserManagerServer
     private userManagerServer: IUserManagerServer<number>
-  ) { }
+  ) {}
   getUser(id: number): Promise<User<number>> {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.");
   }
 
   sendMessage(id: number, message: string): void {

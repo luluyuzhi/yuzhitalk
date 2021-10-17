@@ -19,7 +19,6 @@ export interface IRemoteAuthServer {
 export const IRemoteAuthServer =
   createDecorator<IRemoteAuthServer>("RemoteAuthServer");
 export class RemoteAuthServer implements IRemoteAuthServer {
-
   declare readonly _serviceBrand: undefined;
   private static readonly PROTO_PATH = path.join(__dirname, "auth.proto");
   private static packageDefinition = protoLoader.loadSync(

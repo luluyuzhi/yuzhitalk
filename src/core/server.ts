@@ -7,7 +7,7 @@ import { IProtocol } from "yuzhi/protocol/protocol";
 import * as assert from "assert";
 import { Connector } from "./connector";
 import { ServerImp } from "../common/serverimp";
-import { returnAuthFail, returnAuthSuccess } from '../protocol/auth.utility';
+import { returnAuthFail, returnAuthSuccess } from "../protocol/auth.utility";
 
 export interface IServer {
   readonly _serviceBrand: undefined;
@@ -43,14 +43,22 @@ export class NetService extends ServerImp implements IServer {
         const message = this.Buffer(socket);
         if (message == null) return;
 
-        console.log("ip:", socket.remoteAddress, "port", socket.remotePort, "server received", message);
+        console.log(
+          "ip:",
+          socket.remoteAddress,
+          "port",
+          socket.remotePort,
+          "server received",
+          message
+        );
 
         if (connector.Authed) {
           protocol.handleProtocol(message.subarray(1), connector);
-        }
-        else {
+        } else {
           const auth = await connector.auth(message.subarray(1));
-          connector.send(Buffer.from(auth ? returnAuthSuccess() : returnAuthFail()));
+          connector.send(
+            Buffer.from(auth ? returnAuthSuccess() : returnAuthFail())
+          );
         }
       });
 
@@ -67,7 +75,7 @@ export class NetService extends ServerImp implements IServer {
   }
 
   private init() {
-    this.server.on("end", () => { });
+    this.server.on("end", () => {});
     this.server.on("error", function (e) {
       console.log(e);
     });

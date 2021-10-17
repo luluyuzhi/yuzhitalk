@@ -2,7 +2,6 @@ import { createDecorator } from "yuzhi/instantiation/common/instantiation";
 import { Connector } from "../core/connector";
 import {
   yuzhitalkproto as YuzhitalkProto,
-  MessageType,
   TransfromText,
   TransfromFile,
   TransfromImage,
@@ -11,13 +10,8 @@ import {
   TransfromNotify,
   TransfromPosition,
   TransfromVideo,
-  yuzhitalkproto,
-  encodeMessageType,
 } from "./normal";
-import {
-  IProtocolCollocationServer,
-  MessageStatusTransformer,
-} from "./statemachines";
+import { IProtocolCollocationServer } from "./statemachines";
 
 export interface IProtocolHock {
   readonly _serviceBrand: undefined;
@@ -104,6 +98,7 @@ export class Protocol implements IProtocol {
     @IProtocolCollocationServer
     private collocationServer: IProtocolCollocationServer
   ) {}
+
   public handleProtocol(content: Buffer, connector: Connector) {
     const yuzhiProtocol = this.decode(content);
     if (!yuzhiProtocol) {

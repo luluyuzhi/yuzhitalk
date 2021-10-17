@@ -1,20 +1,40 @@
-import { MessageStatus } from "yuzhi/protocol/statemachines";
-import { User } from '../user/user';
+import { IContent, IHead, MessageStatus } from "yuzhi/protocol/statemachines";
+import { User } from "../user/User";
 import { IUnique } from "yuzhi/utility/SelfDictionary";
-import { Emitter, Event } from '../common/event';
+import { Emitter, Event } from "../common/event";
 
-export class Message<T, U> implements IUnique<U> {
+export interface MessageOptions {
+  hasGlobalsId?: boolean;
+}
 
+export class Message implements IUnique<Long> {
   // 注册一个事件发射器
-  private readonly _onDidMessageSendSuccess = new Emitter<U>();
+  private readonly _onDidMessageSendSuccess = new Emitter<Long>();
   // 将该发射器允许大家订阅的事件取出来
-  public readonly onDidMessageSendSuccess: Event<U> = this._onDidMessageSendSuccess.event;
+  public readonly onDidMessageSendSuccess: Event<Long> =
+    this._onDidMessageSendSuccess.event;
 
-  public constructor(
-    private content: T,
-    private id: U,
+  private globalsId?: Long;
+
+  constructor(
+    private head: IHead,
+    private content: IContent,
+    private id: Long,
+    private sender: User<number>,
+    private receiver: Long,
     private status: MessageStatus = MessageStatus.SendMsgRequest,
+    private options?: MessageOptions
   ) { }
+
+  set GlobalsId(val) {
+    if (this.options?.hasGlobalsId) {
+      this.globalsId = val;
+    }
+  }
+
+  get GlobalsId(): Long | undefined {
+    return this.globalsId;
+  }
 
   set Status(value: MessageStatus) {
     if (value == MessageStatus.SendMsgAcknowled) {
@@ -23,8 +43,7 @@ export class Message<T, U> implements IUnique<U> {
     this.status = value;
   }
 
-  Unique() { return this.id; };
-
+  Unique() {
+    return this.id;
+  }
 }
-
-

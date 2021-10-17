@@ -7,7 +7,7 @@ export class GlobalIdServer extends IdService {
     super();
   }
 
-  gen() {
-    throw new Error("Method not implemented.");
+  override gen() {
+    return 1;
   }
 }

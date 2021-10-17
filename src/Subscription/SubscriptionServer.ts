@@ -1,46 +1,59 @@
-import { createDecorator, IInstantiationService } from 'yuzhi/instantiation/common/instantiation';
-import { Subscription } from './Subscription';
-
+import {
+  createDecorator,
+  IInstantiationService,
+} from "yuzhi/instantiation/common/instantiation";
+import { Subscription } from "./Subscription";
+import { MaxPriorityQueue } from "datastructures-js";
 export interface ISubscriptionServer {
+  readonly _serviceBrand: undefined;
 
-    readonly _serviceBrand: undefined;
-
-    addSubscription(id: number): Subscription;
-    removeSubscription(subscription: Subscription): void;
-    getSubscriptions(): Subscription[];
-    getSubscription(id: number): Subscription;
-    getSubscriptionByTopic(topic: string): Subscription;
+  addSubscription(subscription: Subscription): Subscription;
+  removeSubscription(subscription: Subscription): void;
+  getSubscriptions(): Subscription[];
+  getSubscription(id: Long): Subscription;
+  getSubscriptionByTopic(topic: string): Subscription;
 }
 
-export const ISubscriptionServer = createDecorator<ISubscriptionServer>("ISubscriptionServer");
+export const ISubscriptionServer = createDecorator<ISubscriptionServer>(
+  "ISubscriptionServer"
+);
 
 export class SubscriptionServer implements ISubscriptionServer {
+  declare _serviceBrand: undefined;
 
-    declare _serviceBrand: undefined;
+  private subscriptions: Map<string, MaxPriorityQueue<Subscription>>;
 
-    private subscriptions: Subscription[] = [];
+  constructor(
+    @IInstantiationService private instantiationService: IInstantiationService
+  ) {}
 
-    constructor(@IInstantiationService private instantiationService: IInstantiationService) { }
+  addSubscription(subscription: Subscription): Subscription {
+    let priorityQueue = this.subscriptions.get(subscription.subscript);
+    if (priorityQueue == undefined) {
+      priorityQueue = new MaxPriorityQueue<Subscription>({
+        priority: (e) => e.Unique(),
+      });
 
-    addSubscription(id: number): Subscription {
-        const sub = this.instantiationService.createInstance(Subscription, id);
-        this.subscriptions.push(sub);
-        return sub;
+      this.subscriptions.set(subscription.subscript, priorityQueue);
     }
+    priorityQueue.enqueue(subscription);
 
-    removeSubscription(subscription: Subscription): void {
-        throw new Error("Method not implemented.");
-    }
+    return subscription;
+  }
 
-    getSubscriptions(): Subscription[] {
-        throw new Error("Method not implemented.");
-    }
+  removeSubscription(subscription: Subscription): void {
+    throw new Error("Method not implemented.");
+  }
 
-    getSubscription(id: number): Subscription {
-        throw new Error("Method not implemented.");
-    }
+  getSubscriptions(): Subscription[] {
+    throw new Error("Method not implemented.");
+  }
 
-    getSubscriptionByTopic(topic: string): Subscription {
-        throw new Error("Method not implemented.");
-    }
+  getSubscription(id: Long): Subscription {
+    throw new Error("Method not implemented.");
+  }
+
+  getSubscriptionByTopic(topic: string): Subscription {
+    throw new Error("Method not implemented.");
+  }
 }

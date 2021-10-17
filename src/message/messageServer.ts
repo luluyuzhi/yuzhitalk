@@ -1,29 +1,36 @@
 import { createDecorator } from "yuzhi/instantiation/common/instantiation";
-import { Message } from 'yuzhi/message/message';
-import { MessageStatus } from 'yuzhi/protocol/statemachines';
+import { Message } from "yuzhi/message/message";
+import { IIdServer } from "yuzhi/id/idserver";
+import { User } from "yuzhi/user/User";
+import { ISubscriptionServer } from 'yuzhi/subscription/SubscriptionServer';
+import { IContent, IHead } from 'yuzhi/protocol/statemachines';
 
 export interface IMessageServer {
-
-
-    readonly _serviceBrand: undefined;
-    generateMessage<T, U>(message: T, status: MessageStatus): Message<T, U>;
+  readonly _serviceBrand: undefined;
+  handle(
+    head: IHead,
+    content: IContent,
+    user: User<number>
+  );
 }
 
 export const IMessageServer = createDecorator<IMessageServer>("IMessageServer");
 
 export class MessageServer implements IMessageServer {
-    declare readonly _serviceBrand: undefined;
+  declare readonly _serviceBrand: undefined;
 
-    messages = new Map();
-    constructor() { }
+  constructor(@IIdServer private idServer: IIdServer,
+    @ISubscriptionServer private subscriptionServer: ISubscriptionServer
+  ) { }
 
-    generateMessage<T, U>(content: T, status: MessageStatus = MessageStatus.SendMsgRequest,): Message<T, U> {
-        const message = new Message<T, U>(content, 1 as unknown as U, status);
-        this.messages.set(message.Unique(), message);
-        return message;
-    }
-
-    getMessage<U>(id: U) {
-        return this.messages.get(id);
-    }
+  handle(
+    head: IHead,
+    content: IContent,
+    user: User<number>
+  ) {
+    const message = new Message(head, content, head.timestamp, user, head.statustransto);
+    message.GlobalsId = this.idServer.gen();
+    const sub = this.subscriptionServer.getSubscription(head.statustransto);
+    sub.addMessage(message);
+  }
 }

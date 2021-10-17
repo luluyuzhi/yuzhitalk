@@ -1,6 +1,7 @@
 import { SelfDictionary } from "yuzhi/utility/SelfDictionary";
 import { createDecorator } from "yuzhi/instantiation/common/instantiation";
-import { ICommonPropsHandler, VirtualUser } from "./user";
+import { ICommonPropsHandler } from "../common";
+import { VirtualUser } from "../VirtualUser";
 
 export interface IUserManagerServer<T> {
   readonly _serviceBrand: undefined;
@@ -8,9 +9,9 @@ export interface IUserManagerServer<T> {
   registerSelf(self: ICommonPropsHandler<T>): void;
 }
 
-export const IUserManagerServer = createDecorator<
-  IUserManagerServer<number>
->("UserManagerServerIDNumber");
+export const IUserManagerServer = createDecorator<IUserManagerServer<number>>(
+  "UserManagerServerIDNumber"
+);
 export const IUserManagerServerIDString = createDecorator<
   IUserManagerServer<string>
 >("UserManagerServerIDString");
@@ -23,10 +24,12 @@ export const IUserManagerServerIDObject = createDecorator<
 // 1. 创建虚拟 user
 // 2. 承担着数据的维护
 export class UserManagerServer<T = number> implements IUserManagerServer<T> {
-
   declare readonly _serviceBrand: undefined;
 
-  core: SelfDictionary<T, ICommonPropsHandler<T>> = new SelfDictionary<T, ICommonPropsHandler<T>>();
+  core: SelfDictionary<T, ICommonPropsHandler<T>> = new SelfDictionary<
+    T,
+    ICommonPropsHandler<T>
+  >();
 
   registerSelf(user: ICommonPropsHandler<T>): void {
     if (this.core.has1(user)) {
