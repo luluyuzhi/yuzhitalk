@@ -303,6 +303,62 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
+"@datastructures-js/binary-search-tree@^4.1.0", "@datastructures-js/binary-search-tree@^4.2.2":
+  version "4.3.0"
+  resolved "https://registry.npmjs.org/@datastructures-js/binary-search-tree/-/binary-search-tree-4.3.0.tgz#365a455de8b380c395062ae6bf9192a0ce2e1718"
+  integrity sha512-6lRpNEMIRlD07uLBv8jlSpNNiHDR/09CtyIuEer8Wlw9NaA3CXAAY/b3GhfjjiJI096bQdrV57jCEqESmbWPhQ==
+
+"@datastructures-js/graph@^5.1.1":
+  version "5.1.1"
+  resolved "https://registry.npmjs.org/@datastructures-js/graph/-/graph-5.1.1.tgz#76a14ff94a370dce6953645491d1542db321b144"
+  integrity sha512-sy3pTMEORBhxbdwTMqnlImbndnxmIXBOgJd9kUugYcKGiljskGLANy6ByMCodq/zIGVNDgD/FZDNZ6hmdafISw==
+  dependencies:
+    "@datastructures-js/queue" "^3.1.3"
+
+"@datastructures-js/heap@^3.1.1", "@datastructures-js/heap@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.npmjs.org/@datastructures-js/heap/-/heap-3.2.0.tgz#d8fcdbf58c462c8a3f0fdfd9c6a57ca11505321e"
+  integrity sha512-FcU5ZAyb+VIOZz1HABsJUsbJi2ZyUDO7aoe97hq4d3tK3z8nMgwdxf5bO0gafR0ExFi18YTspntqHLzt4XOgnA==
+
+"@datastructures-js/linked-list@^5.1.1":
+  version "5.1.1"
+  resolved "https://registry.npmjs.org/@datastructures-js/linked-list/-/linked-list-5.1.1.tgz#4e2131b41ef74a368fc1925374abec0dff009579"
+  integrity sha512-fj5vOozZX5Sw+Z7dJcicvQxMbWTuOizZ+dW+pMcYWMMgMiLERzJ3Zv6Tdn+VStej9ax6tq7LIQxKGiZyXMvWmg==
+  dependencies:
+    "@datastructures-js/binary-search-tree" "^4.1.0"
+
+"@datastructures-js/priority-queue@^5.1.1":
+  version "5.2.0"
+  resolved "https://registry.npmjs.org/@datastructures-js/priority-queue/-/priority-queue-5.2.0.tgz#e66de9785a28d91bc8eab48e3da180b910faa266"
+  integrity sha512-BSsk5kPhGUP7XsE18Yzb8pTVXOWWlumk2L9noU1Iv9rRJrxpi1l4co7vHvzfv+JPkkMpFGPCEIFJCo9R93BArw==
+  dependencies:
+    "@datastructures-js/heap" "^3.2.0"
+
+"@datastructures-js/queue@^3.1.3":
+  version "3.1.4"
+  resolved "https://registry.npmjs.org/@datastructures-js/queue/-/queue-3.1.4.tgz#785bcbe29af6003934fd0e7849295d62543dba5d"
+  integrity sha512-8QqkdAJQDDd25OBX28lKj7HXD+Cxs6Ee0ogJkZUjD5R1fAvRAWsrCeKop0szqANYjMwdQQd75vyc3Cm8qNJH+Q==
+
+"@datastructures-js/queue@^4.1.3":
+  version "4.1.3"
+  resolved "https://registry.npmjs.org/@datastructures-js/queue/-/queue-4.1.3.tgz#57bb502621de88ad3f55c9f094e76a36966cd6ca"
+  integrity sha512-vvtwLDJ+R53i+vXr7llIXm2cLI0LzaN9edeJ7sEzti4TQUj/3Bpgp1mJKhWA8CWpW09sysvASab0kPP2cEbjNg==
+
+"@datastructures-js/set@^4.1.1":
+  version "4.1.1"
+  resolved "https://registry.npmjs.org/@datastructures-js/set/-/set-4.1.1.tgz#c3f0ebc24e248b56e92f8204c45623824ebd5d8d"
+  integrity sha512-++5tT32/hlbDyv0mgj4PQsgUG8TALtz6OnCMEbk1/dS1cFl3VUeye1Dx4af5L55UzGfCp1yknQjvRjtIkgzW2w==
+
+"@datastructures-js/stack@^3.1.2":
+  version "3.1.2"
+  resolved "https://registry.npmjs.org/@datastructures-js/stack/-/stack-3.1.2.tgz#c27ad9a044ea9272dbe821c8d3a6646927c5e9b9"
+  integrity sha512-lrLR7wMROZ5ad4iXoX0JktyNTg3cQTjVTlqLiqKzVNipXsyPrlUjPtUsOVLpzHPzQ3IgtDvbejrFpINLiB35vw==
+
+"@datastructures-js/trie@^4.1.1":
+  version "4.1.1"
+  resolved "https://registry.npmjs.org/@datastructures-js/trie/-/trie-4.1.1.tgz#f91bce413e3864f882f07dec7bc2d4cf94be0e30"
+  integrity sha512-S1G9k3GGZNRfLETNT/uUuGcMjkFbFLSNJwalacXs96UNwmnCJTJ0EYpLJH/TNMvDSVbmlntYgXgZXrM66V2q7w==
+
 "@grpc/grpc-js@^1.3.7":
   version "1.3.7"
   resolved "https://registry.nlark.com/@grpc/grpc-js/download/@grpc/grpc-js-1.3.7.tgz#58b687aff93b743aafde237fd2ee9a3259d7f2d8"
@@ -1365,6 +1421,21 @@ data-urls@^2.0.0:
     abab "^2.0.3"
     whatwg-mimetype "^2.3.0"
     whatwg-url "^8.0.0"
+
+datastructures-js@^10.1.1:
+  version "10.1.1"
+  resolved "https://registry.npmjs.org/datastructures-js/-/datastructures-js-10.1.1.tgz#bde78042fb8eaf6596073bbf78c3d07317aebda3"
+  integrity sha512-TVfNYZxkxr9Y/YTluua7EcgVWpo97IzNpCy6C30kVJ659ha5C/4GcYZm7Iak4CWMVh+Eh2tJ75Tvrn3Us2ui4A==
+  dependencies:
+    "@datastructures-js/binary-search-tree" "^4.2.2"
+    "@datastructures-js/graph" "^5.1.1"
+    "@datastructures-js/heap" "^3.1.1"
+    "@datastructures-js/linked-list" "^5.1.1"
+    "@datastructures-js/priority-queue" "^5.1.1"
+    "@datastructures-js/queue" "^4.1.3"
+    "@datastructures-js/set" "^4.1.1"
+    "@datastructures-js/stack" "^3.1.2"
+    "@datastructures-js/trie" "^4.1.1"
 
 date-format@^2.1.0:
   version "2.1.0"

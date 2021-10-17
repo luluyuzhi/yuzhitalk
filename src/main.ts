@@ -16,10 +16,8 @@ import {
 } from "yuzhi/protocol/statemachines";
 import * as dotenv from "dotenv";
 import { IRemoteAuthServer, RemoteAuthServer } from "./outlet/client";
-import {
-  Itransfromto,
-  MessageTranstoServer,
-} from "yuzhi/message/messageTranstoServer";
+
+import { ISubscriptionServer, SubscriptionServer } from './subscription/SubscriptionServer';
 
 dotenv.config();
 
@@ -51,8 +49,7 @@ class CoreMain {
       IProtocolCollocationServer,
       new SyncDescriptor<IProtocolCollocationServer>(ProtocolCollocationServer)
     );
-    collection.set(Itransfromto, new MessageTranstoServer());
-
+    collection.set(ISubscriptionServer, new SyncDescriptor<ISubscriptionServer>( SubscriptionServer));
     collection.set(IRemoteAuthServer, new RemoteAuthServer());
     return new InstantiationService(collection);
   }

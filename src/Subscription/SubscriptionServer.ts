@@ -25,7 +25,7 @@ export class SubscriptionServer implements ISubscriptionServer {
 
   constructor(
     @IInstantiationService private instantiationService: IInstantiationService
-  ) {}
+  ) { }
 
   addSubscription(subscription: Subscription): Subscription {
     let priorityQueue = this.subscriptions.get(subscription.subscript);
