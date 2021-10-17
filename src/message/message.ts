@@ -7,7 +7,7 @@ export interface MessageOptions {
   hasGlobalsId?: boolean;
 }
 
-enum IStates {
+export enum IStates {
   None,
   Ack,
   Notify,
@@ -36,7 +36,7 @@ export class Message implements IUnique<Long> {
     private receiver: Long,
     private status: IStates = IStates.None,
     private options?: MessageOptions
-  ) {}
+  ) { }
 
   get Content() {
     return this.content;
@@ -60,11 +60,21 @@ export class Message implements IUnique<Long> {
     return this.globalsId;
   }
 
-  *gen() {
-    this.status = IStates.Ack;
-    yield this._onDidMessageAckSuccess.fire(this.Unique());
-    this.status = IStates.Notify;
-    yield this._onDidMessageNotifySuccess.fire(this.Unique());
+  private *gen() {
+
+    this._onDidMessageAckSuccess.fire(this.Unique());
+    yield this.status = IStates.Ack;
+
+    this._onDidMessageNotifySuccess.fire(this.Unique());
+    yield this.status = IStates.Notify;
+    return IStates.None;
+  }
+
+  private _g = this.gen();
+
+  get Status() {
+
+    return this._g.next().value;
   }
 
   Unique() {
