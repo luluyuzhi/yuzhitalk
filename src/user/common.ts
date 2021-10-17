@@ -10,12 +10,12 @@ export interface ICommonProps {
 }
 
 interface IContentHandler {
-  handle(status: string): void;
+  handle(buffer: Buffer): void;
 }
 
 export interface ICommonPropsHandler<T>
   extends IUnique<T>,
-  IContentHandler,
-  ICycleElem<T> {
+    IContentHandler,
+    ICycleElem<T> {
   readonly type: "person" | "group";
 }

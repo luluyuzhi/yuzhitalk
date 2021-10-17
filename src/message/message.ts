@@ -1,4 +1,4 @@
-import { IContent, IHead, MessageStatus } from "yuzhi/protocol/statemachines";
+import { IContent, IHead } from "yuzhi/protocol/statemachines";
 import { User } from "../user/User";
 import { IUnique } from "yuzhi/utility/SelfDictionary";
 import { Emitter, Event } from "../common/event";
@@ -7,12 +7,24 @@ export interface MessageOptions {
   hasGlobalsId?: boolean;
 }
 
+enum IStates {
+  None,
+  Ack,
+  Notify,
+}
+
 export class Message implements IUnique<Long> {
   // 注册一个事件发射器
-  private readonly _onDidMessageSendSuccess = new Emitter<Long>();
+  private readonly _onDidMessageAckSuccess = new Emitter<Long>();
   // 将该发射器允许大家订阅的事件取出来
-  public readonly onDidMessageSendSuccess: Event<Long> =
-    this._onDidMessageSendSuccess.event;
+  public readonly onDidMessageAckSuccess: Event<Long> =
+    this._onDidMessageAckSuccess.event;
+
+  // 注册一个事件发射器
+  private readonly _onDidMessageNotifySuccess = new Emitter<Long>();
+  // 将该发射器允许大家订阅的事件取出来
+  public readonly onDidMessageNotifySuccess: Event<Long> =
+    this._onDidMessageNotifySuccess.event;
 
   private globalsId?: Long;
 
@@ -22,9 +34,21 @@ export class Message implements IUnique<Long> {
     private id: Long,
     private sender: User<number>,
     private receiver: Long,
-    private status: MessageStatus = MessageStatus.SendMsgRequest,
+    private status: IStates = IStates.None,
     private options?: MessageOptions
-  ) { }
+  ) {}
+
+  get Content() {
+    return this.content;
+  }
+
+  get Sender() {
+    return this.sender;
+  }
+
+  get Receiver() {
+    return this.receiver;
+  }
 
   set GlobalsId(val) {
     if (this.options?.hasGlobalsId) {
@@ -36,11 +60,11 @@ export class Message implements IUnique<Long> {
     return this.globalsId;
   }
 
-  set Status(value: MessageStatus) {
-    if (value == MessageStatus.SendMsgAcknowled) {
-      this._onDidMessageSendSuccess.fire(this.Unique());
-    }
-    this.status = value;
+  *gen() {
+    this.status = IStates.Ack;
+    yield this._onDidMessageAckSuccess.fire(this.Unique());
+    this.status = IStates.Notify;
+    yield this._onDidMessageNotifySuccess.fire(this.Unique());
   }
 
   Unique() {

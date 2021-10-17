@@ -14,22 +14,13 @@ import {
   TransfromVideo,
   TransfromVoice,
   Long as ILong,
+  encodeyuzhitalkproto,
 } from "./normal";
 import { createDecorator } from "yuzhi/instantiation/common/instantiation";
 import { IInstantiationService } from "yuzhi/instantiation/common/instantiation";
 import { ServiceCollection } from "yuzhi/instantiation/common/serviceCollection";
 import { Connector } from "yuzhi/core/connector";
 import { IMessageServer } from "yuzhi/message/messageServer";
-import { ISubscriptionServer } from "yuzhi/subscription/SubscriptionServer";
-
-export enum MessageStatus {
-  SendMsgRequest,
-  SendMsgNotify,
-  ReceiveMsgNotify,
-  ReceiveMsgRequest,
-  ReceiveMsgAcknowled,
-  SendMsgAcknowled,
-}
 
 export function interToLong<T extends ILong>(e: T | undefined) {
   return e ? new Long(e.low, e.low, e.unsigned) : undefined;
@@ -70,7 +61,7 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
   private subInstantiationService = this.createServices();
   constructor(
     @IInstantiationService private InstantiationService: IInstantiationService,
-    @IMessageServer private messageServer: IMessageServer,
+    @IMessageServer private messageServer: IMessageServer
   ) {}
 
   private createServices(): IInstantiationService {
@@ -82,11 +73,33 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
     this.subInstantiationService.invokeFunction((accessor) => {
       if (![MessageType.Ack, MessageType.Notify].includes(source.messageType)) {
         const de = this.dismantle(source);
-        this.messageServer.handle(
+        const message = this.messageServer.handle(
           de.head,
           de.content,
           connector.user
         );
+        message.onDidMessageAckSuccess((id) => {
+          const ack = {
+            messageType: MessageType.Ack,
+            timestamp: id,
+            statustransfrom: de.head.statustransfrom,
+            statustransto: de.head.statustransto,
+            transfromAck: {
+              ack: "a",
+            },
+          } as yuzhitalkproto;
+          connector.send(Buffer.from(encodeyuzhitalkproto(ack)));
+        });
+
+        message.onDidMessageNotifySuccess((id) => {
+          const Notify = {
+            messageType: MessageType.Notify,
+            timestamp: id,
+            statustransfrom: de.head.statustransfrom,
+            statustransto: de.head.statustransto,
+          } as yuzhitalkproto;
+          connector.send(Buffer.from(encodeyuzhitalkproto(Notify)));
+        });
       }
     });
   }

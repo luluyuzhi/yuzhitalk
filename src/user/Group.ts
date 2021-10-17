@@ -1,16 +1,14 @@
-
 import { ICommonPropsHandler } from "./common";
-import { User } from './User';
+import { User } from "./User";
 
 export class Group<T> implements ICommonPropsHandler<T> {
-
-  readonly type = 'group';
+  readonly type = "group";
   private handlers: (ICommonPropsHandler<T> | T)[] = [];
 
   constructor(
     private readonly groupId: T,
     private readonly owner: ICommonPropsHandler<T>
-  ) { }
+  ) {}
 
   Unique() {
     return this.groupId;
@@ -20,7 +18,7 @@ export class Group<T> implements ICommonPropsHandler<T> {
     throw new Error("Method not implemented.");
   }
 
-  handle(status: string): void {
+  handle(buffer: Buffer): void {
     throw new Error("Method not implemented.");
   }
 }

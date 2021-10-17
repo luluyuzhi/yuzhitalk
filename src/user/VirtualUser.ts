@@ -1,14 +1,14 @@
 import { ICommonPropsHandler } from "./common";
 
 export class VirtualUser<T> implements ICommonPropsHandler<T> {
-  readonly type = 'person';
+  readonly type = "person";
   constructor(private readonly userId: T) {}
 
   dispose(): void {
     throw new Error("Method not implemented.");
   }
 
-  handle(status: string): void {
+  handle(buffer: Buffer): void {
     throw new Error("Method not implemented.");
   }
 

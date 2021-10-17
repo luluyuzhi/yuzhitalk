@@ -2,6 +2,7 @@ import { User } from "yuzhi/user/User";
 import { IUserService } from "yuzhi/user/server/UserServer";
 import { Emitter, Event } from "../common/event";
 import * as URI from "uri-js";
+import * as Long from "long";
 import { IUnique } from "yuzhi/utility/SelfDictionary";
 import { ISubscriptionServer } from "./SubscriptionServer";
 import { Message } from "../message/message";
@@ -12,6 +13,7 @@ import { MaxPriorityQueue } from "datastructures-js";
 export interface ISubscription extends IUnique<number> {
   readonly subscript: string;
   type(): string;
+  handle(id: Message): void;
   handle(id: Long): void;
   addMessage(message: Message): void;
 }
@@ -31,7 +33,9 @@ export abstract class Subscription implements ISubscription {
     this.subscripturi = URI.parse(subscript);
     this.id = Number(this.subscripturi.host);
     this.messages = new MaxPriorityQueue<Message>({
-      compare: (a, b) => { return a.Unique().compare(b.Unique()); }
+      compare: (a, b) => {
+        return a.Unique().compare(b.Unique());
+      },
     });
     this.subscriptionServer.addSubscription(this);
   }
@@ -39,11 +43,20 @@ export abstract class Subscription implements ISubscription {
   addMessage(message: Message): void {
     this._m.set(message.Unique(), message);
     this.messages.enqueue(message);
+    this.handle(message);
   }
 
-  handle(id: Long): void {
-    const msg = this._m.get(id);
+  handle(id: Long | Message): void {
+    if (Long.isLong(id)) {
+      const msg = this._m.get(id);
+      this.transfrom(msg);
+      return;
+    }
+    const message = id as Message;
+    this.transfrom(message);
   }
+
+  abstract transfrom(message: Message): void;
 
   type(): string {
     return this.subscripturi.path;

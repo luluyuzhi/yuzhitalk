@@ -1,5 +1,5 @@
-
-import { ICommonPropsHandler } from '../user/common';
+import { Message } from "../message/message";
+import { ICommonPropsHandler } from "../user/common";
 import { Subscription } from "./Subscription";
 import { ISubscriptionServer } from "./SubscriptionServer";
 
@@ -14,7 +14,7 @@ export class GroupSubscription extends Subscription {
     super(GroupSubscription.hint + subId, subscriptionServer);
   }
 
-  override handle(message: Long): void {
+  transfrom(message: Message): void {
     throw new Error("Method not implemented.");
   }
 }
