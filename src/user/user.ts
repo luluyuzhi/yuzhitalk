@@ -10,10 +10,10 @@ export class User<T extends number> implements ICommonPropsHandler<T> {
     private readonly userId: T,
     private connector: Connector,
     @ISubscriptionServer private subscriptionServer: ISubscriptionServer
-  ) {}
+  ) { }
 
   handle(buffer: Buffer): void {
-    throw new Error("Method not implemented.");
+    this.connector.send(buffer);
   }
 
   Unique(): T {

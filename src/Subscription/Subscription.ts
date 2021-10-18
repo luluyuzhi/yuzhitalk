@@ -5,7 +5,7 @@ import * as URI from "uri-js";
 import * as Long from "long";
 import { IUnique } from "yuzhi/utility/SelfDictionary";
 import { ISubscriptionServer } from "./SubscriptionServer";
-import { Message } from "../message/message";
+import { Message } from "../session/message";
 import { MaxPriorityQueue } from "datastructures-js";
 
 // lulu://sendtype:group@yuzhi.com:{id}/

@@ -1,4 +1,4 @@
-import { Message } from "../message/message";
+import { Message } from "../session/message";
 import { ICommonPropsHandler } from "../user/common";
 import { Subscription } from "./Subscription";
 import { ISubscriptionServer } from "./SubscriptionServer";

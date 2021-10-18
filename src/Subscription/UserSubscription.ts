@@ -1,5 +1,5 @@
 import { ICommonPropsHandler } from "yuzhi/user/common";
-import { IStates, Message } from "yuzhi/message/message";
+import { IStates, Message } from "yuzhi/session/message";
 import { encodeyuzhitalkproto, MessageType, yuzhitalkproto } from "yuzhi/protocol/normal";
 import { Subscription } from "./Subscription";
 import { ISubscriptionServer } from "./SubscriptionServer";

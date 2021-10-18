@@ -18,11 +18,8 @@ import {
 } from "./normal";
 import { createDecorator } from "yuzhi/instantiation/common/instantiation";
 import { IInstantiationService } from "yuzhi/instantiation/common/instantiation";
-import { ServiceCollection } from "yuzhi/instantiation/common/serviceCollection";
 import { Connector } from "yuzhi/core/connector";
-import { IMessageServer } from "yuzhi/message/messageServer";
-import { ISubscriptionServer, SubscriptionServer } from 'yuzhi/subscription/SubscriptionServer';
-import { SyncDescriptor } from '../instantiation/common/descriptors';
+import { ISessionServer } from '../session/SessionServer';
 
 export function interToLong<T extends ILong>(e: T | undefined) {
   return e ? new Long(e.low, e.low, e.unsigned) : undefined;
@@ -60,16 +57,10 @@ export const IProtocolCollocationServer =
 export class ProtocolCollocationServer implements IProtocolCollocationServer {
   declare readonly _serviceBrand: undefined;
 
-  private subInstantiationService = this.createServices();
   constructor(
     @IInstantiationService private InstantiationService: IInstantiationService,
-    @IMessageServer private messageServer: IMessageServer
+    @ISessionServer private messageServer: ISessionServer
   ) { }
-
-  private createServices(): IInstantiationService {
-    let collection = new ServiceCollection();
-    return this.InstantiationService.createChild(collection);
-  }
 
   handleSource(source: yuzhitalkproto, connector: Connector) {
 
