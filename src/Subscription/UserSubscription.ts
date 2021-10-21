@@ -1,6 +1,10 @@
 import { ICommonPropsHandler } from "yuzhi/user/common";
-import { IStates, Message } from "yuzhi/session/message";
-import { encodeyuzhitalkproto, MessageType, yuzhitalkproto } from "yuzhi/protocol/normal";
+import { IStates, Session } from "yuzhi/session/Session";
+import {
+  encodeyuzhitalkproto,
+  MessageType,
+  yuzhitalkproto,
+} from "yuzhi/protocol/normal";
 import { Subscription } from "./Subscription";
 import { ISubscriptionServer } from "./SubscriptionServer";
 import * as Long from "long";
@@ -15,7 +19,7 @@ export class UserSubscription extends Subscription {
     super(UserSubscription.hint + owner.Unique(), subscriptionServer);
   }
 
-  transfrom(message: Message): void {
+  transfrom(message: Session): void {
     let toB: yuzhitalkproto;
     switch (message.Status) {
       case IStates.Ack:
@@ -25,7 +29,7 @@ export class UserSubscription extends Subscription {
           statustransfrom: Long.fromNumber(message.Sender.Unique()),
           statustransto: message.Receiver,
           id: message.GlobalsId,
-          ...message.Content
+          ...message.Content,
         };
         break;
       case IStates.Notify:
@@ -33,7 +37,7 @@ export class UserSubscription extends Subscription {
           messageType: MessageType.Notify,
           timestamp: message.Unique(),
           statustransfrom: Long.fromNumber(message.Sender.Unique()),
-          statustransto: message.Receiver,
+          statustransto: message.Receiver as Long,
           id: message.GlobalsId,
         };
     }

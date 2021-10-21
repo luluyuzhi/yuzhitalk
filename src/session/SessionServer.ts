@@ -1,13 +1,21 @@
 import { createDecorator } from "yuzhi/instantiation/common/instantiation";
-import { Message } from "yuzhi/session/message";
+import { Session } from "yuzhi/session/Session";
 import { IIdServer } from "yuzhi/id/idServer";
 import { User } from "yuzhi/user/User";
 import { ISubscriptionServer } from "yuzhi/subscription/SubscriptionServer";
-import { IContent, IHead } from "yuzhi/protocol/statemachines";
+import * as Long from "long";
+import { Subscription } from "../subscription/Subscription";
+
+// interface IIner
 
 export interface ISessionServer {
   readonly _serviceBrand: undefined;
-  handle(head: IHead, content: IContent, user: User<number>): Message;
+  generateSession(
+    timestamp: Long,
+    content: any,
+    sender: User<number>,
+    receiver: Long | User<number>
+  ): Session;
 }
 
 export const ISessionServer = createDecorator<ISessionServer>("ISessionServer");
@@ -18,19 +26,28 @@ export class SessionServer implements ISessionServer {
   constructor(
     @IIdServer private idServer: IIdServer,
     @ISubscriptionServer private subscriptionServer: ISubscriptionServer
-  ) { }
+  ) {}
 
-  handle(head: IHead, content: IContent, user: User<number>) {
-    const message = new Message(
-      head,
+  generateSession(
+    timestamp: Long,
+    content: any,
+    sender: User<number>,
+    receiver: Long | User<number>
+  ) {
+    let sub: Subscription;
+    if (receiver instanceof Long) {
+      sub = this.subscriptionServer.getSubscription(receiver);
+    } else {
+      sub = receiver.getSubscription();
+    }
+    const session = new Session(
       content,
-      head.timestamp,
-      user,
-      head.statustransto
+      timestamp,
+      sender, // sender
+      receiver, // receiver
+      sub
     );
-    message.GlobalsId = this.idServer.gen();
-    const sub = this.subscriptionServer.getSubscription(head.statustransto);
-    sub.addMessage(message);
-    return message;
+    session.GlobalsId = this.idServer.gen();
+    return session;
   }
 }

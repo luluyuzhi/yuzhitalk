@@ -5,7 +5,7 @@ import * as URI from "uri-js";
 import * as Long from "long";
 import { IUnique } from "yuzhi/utility/SelfDictionary";
 import { ISubscriptionServer } from "./SubscriptionServer";
-import { Message } from "../session/message";
+import { Session } from "../session/Session";
 import { MaxPriorityQueue } from "datastructures-js";
 
 // lulu://sendtype:group@yuzhi.com:{id}/
@@ -13,17 +13,17 @@ import { MaxPriorityQueue } from "datastructures-js";
 export interface ISubscription extends IUnique<number> {
   readonly subscript: string;
   type(): string;
-  handle(id: Message): void;
+  handle(id: Session): void;
   handle(id: Long): void;
-  addMessage(message: Message): void;
+  addMessage(message: Session): void;
 }
 
 export abstract class Subscription implements ISubscription {
   private id: number;
   private readonly subscripturi: URI.URIComponents;
 
-  private messages: MaxPriorityQueue<Message>;
-  private _m: Map<Long, Message> = new Map();
+  private messages: MaxPriorityQueue<Session>;
+  private _m: Map<Long, Session> = new Map();
   public constructor(
     // lulu://group:subscription@chat.yuzhi.com:{id}/
     readonly subscript: string,
@@ -32,7 +32,7 @@ export abstract class Subscription implements ISubscription {
   ) {
     this.subscripturi = URI.parse(subscript);
     this.id = Number(this.subscripturi.host);
-    this.messages = new MaxPriorityQueue<Message>({
+    this.messages = new MaxPriorityQueue<Session>({
       compare: (a, b) => {
         return a.Unique().compare(b.Unique());
       },
@@ -40,23 +40,23 @@ export abstract class Subscription implements ISubscription {
     this.subscriptionServer.addSubscription(this);
   }
 
-  addMessage(message: Message): void {
+  addMessage(message: Session): void {
     this._m.set(message.Unique(), message);
     this.messages.enqueue(message);
     this.handle(message);
   }
 
-  handle(id: Long | Message): void {
+  handle(id: Long | Session): void {
     if (Long.isLong(id)) {
       const msg = this._m.get(id);
       this.transfrom(msg);
       return;
     }
-    const message = id as Message;
+    const message = id as Session;
     this.transfrom(message);
   }
 
-  abstract transfrom(message: Message): void;
+  abstract transfrom(message: Session): void;
 
   type(): string {
     return this.subscripturi.path;

@@ -1,4 +1,4 @@
-import { Message } from "../session/message";
+import {  Session } from "../session/Session";
 import { ICommonPropsHandler } from "../user/common";
 import { Subscription } from "./Subscription";
 import { ISubscriptionServer } from "./SubscriptionServer";
@@ -14,7 +14,7 @@ export class GroupSubscription extends Subscription {
     super(GroupSubscription.hint + subId, subscriptionServer);
   }
 
-  transfrom(message: Message): void {
+  transfrom(message: Session): void {
     throw new Error("Method not implemented.");
   }
 }
