@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { once } from "yuzhi/common/functional";
-import { Iterable } from "yuzhi/common/iterator";
+import { once } from "./functional";
+import { Iterable } from "./iterator";
 
 /**
  * Enables logging of potentially leaked disposables.

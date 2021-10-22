@@ -3,17 +3,17 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { onUnexpectedError } from "yuzhi/common/errors";
-import { once as onceFn } from "yuzhi/common/functional";
+import { onUnexpectedError } from "./errors";
+import { once as onceFn } from "./functional";
 import {
   Disposable,
   IDisposable,
   toDisposable,
   combinedDisposable,
   DisposableStore,
-} from "yuzhi/common/lifecycle";
-import { LinkedList } from "yuzhi/common/linkedList";
-import { StopWatch } from "yuzhi/common/stopwatch";
+} from "./lifecycle";
+import { LinkedList } from "./linkedList";
+import { StopWatch } from "./stopwatch";
 
 /**
  * To an event a function with one or zero parameters

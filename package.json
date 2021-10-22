@@ -4,12 +4,13 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "mocha out/*.test.js",
+        "test": "mocha dist/**/test/*.test.js",
         "build": "tsc",
         "start": "dapr run --app-id=service-chat --dapr-http-port=3501 --app-port=8080 -- ts-node --project src/tsconfig.json  -r tsconfig-paths/register   src/main.ts",
         "server": "ts-node --project src/tsconfig.json  -r tsconfig-paths/register   src/main.ts",
         "client": "ts-node src/client.ts",
-        "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
+        "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+        "watch": "tsc -w"
     },
     "config": {
         "port": 8080
