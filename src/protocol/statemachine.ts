@@ -1,4 +1,12 @@
-import { createMachine, interpret, send, assign, ActionObject, AnyEventObject, StateMachine } from "xstate";
+import {
+  createMachine,
+  interpret,
+  send,
+  assign,
+  ActionObject,
+  AnyEventObject,
+  StateMachine,
+} from "xstate";
 export interface IExtreContext {
   data?: any;
 }
@@ -40,7 +48,7 @@ export const manich = () =>
     {
       id: "yustates",
       context: {
-        ...interDefaultState
+        ...interDefaultState,
       },
       states: {
         endlong: {
@@ -66,7 +74,10 @@ export const manich = () =>
                 },
                 INC: {
                   cond: (context, event) => context._retry < 3,
-                  actions: [assign({ _retry: (context) => context._retry + 1 }), "endlong_retry"],
+                  actions: [
+                    assign({ _retry: (context) => context._retry + 1 }),
+                    "endlong_retry",
+                  ],
                 },
               },
               after: {
@@ -144,11 +155,11 @@ export const manich = () =>
     {
       actions: {
         across_retry: (context, event) => {
-          throw new Error("need implements across_retry")
+          throw new Error("need implements across_retry");
         },
         endlong_retry: (context, event) => {
-          throw new Error("need implements endlong_retry")
-        }
+          throw new Error("need implements endlong_retry");
+        },
       },
       delays: {
         RETRY_DELAY: (context, event) => {
@@ -165,7 +176,13 @@ export const manich = () =>
       },
       guards: { glassIsFull, glassIsFull2, restore, nextStates },
     }
-  ) as StateMachine<IContext, any, AnyEventObject, {
-    value: any;
-    context: IContext;
-  }, ActionObject<IContext, AnyEventObject>>;
+  ) as StateMachine<
+    IContext,
+    any,
+    AnyEventObject,
+    {
+      value: any;
+      context: IContext;
+    },
+    ActionObject<IContext, AnyEventObject>
+  >;

@@ -1,10 +1,7 @@
 import { InstantiationService } from "yuzhi/instantiation/common/instantiationService";
 import { SyncDescriptor } from "yuzhi/instantiation/common/descriptors";
 import { ServiceCollection } from "yuzhi/instantiation/common/serviceCollection";
-import {
-  IProtocol,
-  Protocol,
-} from "yuzhi/protocol/protocol";
+import { IProtocol, Protocol } from "yuzhi/protocol/protocol";
 import { NetService } from "yuzhi/core/server";
 import { IInstantiationService } from "yuzhi/instantiation/common/instantiation";
 import { options } from "yuzhi/option";

@@ -1,13 +1,16 @@
-import { createDecorator } from "yuzhi/instantiation/common/instantiation";
-import { ICommonProps } from "../common";
-import { User } from "../User";
 import {
-  IUserManagerServer,
-  // IUserManagerServerIDNumber,
-} from "./UserManagerServer";
+  createDecorator,
+  IInstantiationService,
+} from "yuzhi/instantiation/common/instantiation";
+import { Connector } from "../../core/connector";
+import { ICommonProps } from "../common";
+import { OnlionUser, User, VirtualUser } from "../User";
+import { ICommonPropsHandlerCollection } from "./CommonPropsHandlerServer";
 
 export interface IUserService extends ICommonProps {
   readonly _serviceBrand: undefined;
+  createUser(userId: number, connector: Connector): User;
+  getUser(userId: number): User;
 }
 
 export const IUserService = createDecorator<IUserService>("IUserService");
@@ -16,21 +19,35 @@ export class UserService implements IUserService {
   declare readonly _serviceBrand: undefined;
 
   constructor(
-    @IUserManagerServer
-    private userManageruserService: IUserManagerServer<number>
+    @ICommonPropsHandlerCollection
+    private commonPropsHandlerCollection: ICommonPropsHandlerCollection,
+    @IInstantiationService private instantiationService: IInstantiationService
   ) {}
 
-  getUser(id: number): Promise<User<number>> {
-    throw new Error("Method not implemented.");
+  createUser(userId: number, connector: Connector) {
+    const user = this.instantiationService.createInstance(
+      OnlionUser,
+      userId,
+      connector
+    );
+    const key = `yuzhi://user:yu@.com:${userId}`;
+    this.commonPropsHandlerCollection.registerCommonPropsHandler(key, user);
+    return user;
   }
 
-  sendMessage(id: number, message: string): void {
-    throw new Error("Method not implemented.");
-    // this.userManageruserService.getUser(id).sendMessage(message);
+  getUser(userId: number) {
+    const user = this.commonPropsHandlerCollection.getCommonPropsHandler(
+      `yuzhi://user:yu@.com:${userId}`
+    ) as User | undefined;
+    return user ?? this.createVirtualUser(userId);
   }
 
-  recallMessage(id: number): void {
-    throw new Error("Method not implemented.");
-    //this.userManageruserService.getUser(id).recallMessage();
+  private createVirtualUser(userId: number) {
+    const user = this.instantiationService.createInstance(VirtualUser, userId);
+    this.commonPropsHandlerCollection.registerCommonPropsHandler(
+      `yuzhi://user:yu@.com:${userId}`,
+      user
+    );
+    return user;
   }
 }

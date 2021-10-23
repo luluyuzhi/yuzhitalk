@@ -1,9 +1,8 @@
-import 'mocha';
-import { expect } from 'chai';
-import { spy } from 'sinon';
-import { manich } from '../statemanich';
-import { interpret } from 'xstate';
-
+import "mocha";
+import { expect } from "chai";
+import { spy } from "sinon";
+import { manich } from "../statemachine";
+import { interpret } from "xstate";
 
 // describe('testFunc 测试', function () {
 //     it('可以正常累加', function () {
