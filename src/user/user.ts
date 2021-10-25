@@ -4,6 +4,7 @@ import { UserSubscription } from "yuzhi/subscription/UserSubscription";
 import { ICommonPropsHandler } from "./common";
 import * as Long from "long";
 import { Subscription } from "../subscription/Subscription";
+import { IChannel } from "yuzhi/session/Session";
 
 type unique_type = number;
 

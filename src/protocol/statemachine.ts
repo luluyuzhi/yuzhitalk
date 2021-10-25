@@ -1,6 +1,5 @@
 import {
   createMachine,
-  interpret,
   send,
   assign,
   ActionObject,

@@ -6,11 +6,12 @@ import {
   JoinColumn,
 } from "typeorm";
 import { Profile } from "./Profile";
+import * as Long from "long";
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  id: Long;
 
   @Column({ nullable: false })
   nickname: string;

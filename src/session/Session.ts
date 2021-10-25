@@ -1,68 +1,95 @@
 import { User } from "../user/User";
-import { IUnique } from "yuzhi/utility/SelfDictionary";
-import { Emitter, Event } from "../common/event";
+import { IUnique, SelfDictionary } from "yuzhi/utility/SelfDictionary";
 import { Subscription } from "../subscription/Subscription";
+import { Transformation } from './Transformation';
+import Long = require("long");
+import { ISessionServer } from "./SessionServer";
+import { IUserService } from "yuzhi/user/server/UserServer";
 
-export interface SessionOptions {
-  hasGlobalsId?: boolean;
+
+interface ISession {
+  registerTransition(transformation: Transformation): void;
+  undockTransition(transformation: Transformation): void;
 }
 
-export enum IStates {
-  None,
-  Ack,
-  Notify,
+export interface IChannel extends IUnique<Long> {
+
+  registerTransition(transformation: Transformation);
+  inject(context: any);
 }
 
-export class Session implements IUnique<Long> {
-  private globalsId?: Long;
+export class Session implements IUnique<Long>, ISession {
+
+  private transformations = new SelfDictionary();
 
   constructor(
-    private content: any,
     private id: Long,
-    private sender: User<number>,
-    private receiver: Long | User<number>,
-    private subscription: Subscription,
-    private status: IStates = IStates.None,
-    private options?: SessionOptions
+    @ISessionServer private sessionServer: ISessionServer,
+    private sessionType: "singleChat" | "groupChat" = 'singleChat',
   ) {
-    subscription.addMessage(this);
+    sessionServer.registerSession(this);
   }
 
-  get Content() {
-    return this.content;
+  undockTransition(transformation: Transformation): void {
+    throw new Error("Method not implemented.");
   }
 
-  get Sender() {
-    return this.sender;
-  }
-
-  get Receiver() {
-    return this.receiver;
-  }
-
-  set GlobalsId(val) {
-    if (this.options?.hasGlobalsId) {
-      this.globalsId = val;
+  registerTransition(transformation: Transformation) {
+    if (!this.transformations.has1(transformation)) {
+      this.transformations.set(transformation);
     }
+    throw new Error("transformation repetition");
   }
 
-  get GlobalsId(): Long | undefined {
-    return this.globalsId;
-  }
-
-  private *gen() {
-    yield (this.status = IStates.Ack);
-    yield (this.status = IStates.Notify);
-    return IStates.None;
-  }
-
-  private _g = this.gen();
-
-  get Status() {
-    return this._g.next().value;
-  }
+  // protected has(id: Long): boolean {
+  //   return this.transformations.has(id);
+  // }
 
   Unique() {
     return this.id;
+  }
+}
+
+export class SingleSession extends Session {
+
+  constructor(id: Long,
+    private creater: User,
+    private pointer: User | Long,  // IUnique<Long>,
+    @ISessionServer sessionServer: ISessionServer,
+    @IUserService private userService: IUserService
+  ) {
+    super(id, sessionServer, 'singleChat');
+    const self = this;
+    this.creater.getSubscription().registerChannel(
+      new class implements IChannel {
+        Unique() {
+          if (self.pointer instanceof Long) {
+            return self.pointer;
+          }
+          return self.pointer.Unique() as unknown as Long;
+        }
+
+        registerTransition(transformation: Transformation) {
+          self.registerTransition(transformation);
+        }
+
+        inject(context: any) {
+          if (self.pointer instanceof Long) {
+            const user = self.userService.getUser(self.pointer as unknown as number);
+            user.handle(context);
+            return;
+          }
+          self.pointer.handle(context);
+        }
+      }
+    );
+  }
+}
+
+class SeriesSession extends Session {
+
+  constructor(id: Long,
+    @ISessionServer sessionServer: ISessionServer,) {
+    super(id, sessionServer, 'groupChat');
   }
 }

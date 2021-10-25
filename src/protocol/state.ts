@@ -9,9 +9,6 @@ interface IState {
 }
 
 export abstract class State implements IState {
-  private readonly _onDidChangeZoomLevel = new Emitter<number>();
-  public readonly onDidChangeZoomLevel: Event<number> =
-    this._onDidChangeZoomLevel.event;
 
   private yuStatesService: Interpreter<
     Record<string, any>,
@@ -40,6 +37,9 @@ export abstract class State implements IState {
       console.log(state);
     });
     this.yuStatesService.subscribe();
+  }
+
+  start(): void {
     this.yuStatesService.start();
     this.yuStatesService.send("idle");
   }
