@@ -17,9 +17,7 @@ export interface ICommonPropsHandlerCollection {
 }
 
 export const ICommonPropsHandlerCollection =
-  createDecorator<ICommonPropsHandlerCollection>(
-    "ICommonPropsHandlerCollection"
-  );
+  createDecorator<ICommonPropsHandlerCollection>( "ICommonPropsHandlerCollection");
 
 export class ICommonPropsHandlerCollectionServer
   implements ICommonPropsHandlerCollection

@@ -20,28 +20,5 @@ export class UserSubscription extends Subscription {
   }
 
   transfrom(message: Session): void {
-    // let toB: yuzhitalkproto;
-    // switch (message.Status) {
-    //   case IStates.Ack:
-    //     toB = {
-    //       messageType: MessageType.Text,
-    //       timestamp: message.Unique(),
-    //       statustransfrom: Long.fromNumber(message.Sender.Unique()),
-    //       statustransto: message.Receiver,
-    //       id: message.GlobalsId,
-    //       ...message.Content,
-    //     };
-    //     break;
-    //   case IStates.Notify:
-    //     toB = {
-    //       messageType: MessageType.Notify,
-    //       timestamp: message.Unique(),
-    //       statustransfrom: Long.fromNumber(message.Sender.Unique()),
-    //       statustransto: message.Receiver as Long,
-    //       id: message.GlobalsId,
-    //     };
-    // }
-
-    // this.owner.handle(Buffer.from(encodeyuzhitalkproto(toB)));
   }
 }

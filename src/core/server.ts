@@ -52,7 +52,7 @@ export class NetService extends ServerImp implements IServer {
           message
         );
 
-        if (connector.Authed) {
+        if (!connector.Authed) {
           protocol.handleProtocol(message.subarray(1), connector);
         } else {
           const auth = await connector.auth(message.subarray(1));

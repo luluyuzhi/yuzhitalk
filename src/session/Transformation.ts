@@ -38,7 +38,7 @@ export class Transformation extends State implements IUnique<Long> {
         });
     }
 
-    constructor(id: Long, mess: any, private sender: Long, private receiver: Long) {
+    constructor(id: Long, context: any, private sender: Long, private receiver: Long) {
         super(context);
         this.transformationId = id;
     }

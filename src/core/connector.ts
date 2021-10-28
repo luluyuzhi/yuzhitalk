@@ -15,7 +15,7 @@ export class Connector implements IConnector {
     @IRemoteAuthServer private remoteAuthServer: IRemoteAuthServer,
     @IUserService private userService: IUserService,
     @IInstantiationService private instantiationService: IInstantiationService // @IAuthServer private authServer: IAuthServer // @IUserService userService
-  ) {}
+  ) { }
 
   public user?: User;
 
@@ -24,12 +24,9 @@ export class Connector implements IConnector {
   }
 
   send(s: Buffer) {
-    this.socket.write(s, (e) => {
-      if (e) {
-        console.log("socket send fail, connect break");
-        this.Disconnect();
-      }
-    });
+    this.socket.write(s);
+    process.stdin.pipe(this.socket);
+    process.stdin.resume();
   }
 
   async auth(s: Buffer): Promise<boolean> {

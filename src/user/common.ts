@@ -6,6 +6,7 @@ import { User } from "./User";
 export interface ICommonProps {}
 
 interface IContentHandler {
+  
   handle(buffer: Buffer): void;
 }
 

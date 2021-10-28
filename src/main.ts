@@ -16,6 +16,10 @@ import {
   ISubscriptionServer,
   SubscriptionServer,
 } from "./subscription/SubscriptionServer";
+import { ISessionServer, SessionServer } from "./session/SessionServer";
+import { IIdServer, IdService } from "./id/idServer";
+import { IUserService, UserService } from "./user/server/UserServer";
+import { ICommonPropsHandlerCollection, ICommonPropsHandlerCollectionServer } from "./user/server/CommonPropsHandlerServer";
 
 dotenv.config();
 
@@ -48,6 +52,21 @@ class CoreMain {
       new SyncDescriptor<ISubscriptionServer>(SubscriptionServer)
     );
     collection.set(IRemoteAuthServer, new RemoteAuthServer());
+    collection.set(ISessionServer,
+      new SyncDescriptor<ISessionServer>(SessionServer)
+    );
+
+    collection.set(IIdServer,
+      new SyncDescriptor<IIdServer>(IdService)
+    );
+    collection.set(IUserService,
+      new SyncDescriptor<IUserService>(UserService)
+    );
+
+    collection.set(ICommonPropsHandlerCollection,
+      new SyncDescriptor<ICommonPropsHandlerCollection>(ICommonPropsHandlerCollectionServer)
+    );
+    
     return new InstantiationService(collection);
   }
 }

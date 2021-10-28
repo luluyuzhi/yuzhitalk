@@ -10,6 +10,7 @@ import { IUserService } from "yuzhi/user/server/UserServer";
 interface ISession {
   registerTransition(transformation: Transformation): void;
   undockTransition(transformation: Transformation): void;
+  has(id: Long): Transformation | undefined;
 }
 
 export interface IChannel extends IUnique<Long> {
@@ -20,7 +21,7 @@ export interface IChannel extends IUnique<Long> {
 
 export class Session implements IUnique<Long>, ISession {
 
-  private transformations = new SelfDictionary();
+  private transformations = new SelfDictionary<Long, Transformation>();
 
   constructor(
     private id: Long,
@@ -37,13 +38,14 @@ export class Session implements IUnique<Long>, ISession {
   registerTransition(transformation: Transformation) {
     if (!this.transformations.has1(transformation)) {
       this.transformations.set(transformation);
+      return;
     }
     throw new Error("transformation repetition");
   }
 
-  // protected has(id: Long): boolean {
-  //   return this.transformations.has(id);
-  // }
+  has(id: Long): Transformation | undefined {
+    return this.transformations.get(id);
+  }
 
   Unique() {
     return this.id;

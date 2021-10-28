@@ -31,7 +31,6 @@ export abstract class Subscription implements ISubscription {
     this.subscripturi = URI.parse(subscript);
     this.id = Number(this.subscripturi.host);
     this.subscriptionServer.addSubscription(this);
-
   }
 
   registerChannel(channel: IChannel) {

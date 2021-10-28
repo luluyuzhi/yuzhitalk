@@ -28,8 +28,8 @@ export abstract class State implements IState {
     });
     yuStates = yuStates.withConfig({
       actions: {
-        endlong_retry: this.endlongRetry,
-        across_retry: this.acrossRetry,
+        endlong_retry: this.endlongRetry.bind(this),
+        across_retry: this.acrossRetry.bind(this),
       },
     });
 

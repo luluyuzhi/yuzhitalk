@@ -61,9 +61,7 @@ const socket = tls.connect(8080, options, () => {
 
 // socket.setEncoding('utf8');
 socket.on("data", (data) => {
-  const message = schema.decodeDemo(data);
-
-  console.log(message);
+  console.log(data);
 });
 socket.on("end", () => {
   console.log("server disconnect!");

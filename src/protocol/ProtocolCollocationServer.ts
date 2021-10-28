@@ -23,6 +23,8 @@ import { Connector } from "yuzhi/core/connector";
 import { ISessionServer } from "yuzhi/session/SessionServer";
 import { Session, SingleSession } from "yuzhi/session/Session";
 import { Transformation } from "yuzhi/session/Transformation";
+import { User } from "yuzhi/user/User";
+import { IUserService } from "yuzhi/user/server/UserServer";
 
 export function interToLong<T extends ILong>(e: T | undefined) {
   return e ? new Long(e.low, e.low, e.unsigned) : undefined;
@@ -40,7 +42,8 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
 
   constructor(
     @IInstantiationService private instantiationService: IInstantiationService,
-    @ISessionServer private sessionServer: ISessionServer
+    @ISessionServer private sessionServer: ISessionServer,
+    @IUserService private userService: IUserService,
   ) { }
 
   transmit(id: Long, source: yuzhitalkproto, connector: Connector) {
@@ -76,29 +79,40 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
   }
 
   handleSource(source: yuzhitalkproto, connector: Connector) {
-    if (![MessageType.Ack, MessageType.Notify].includes(source.messageType)) {
 
-      let session: Session = this.sessionServer.getSession(new Long(1));
+    connector.user = this.userService.createUser(1, connector);
+    let session = this.sessionServer.getSession(new Long(1));
+    if (![MessageType.Ack, MessageType.Notify].includes(source.messageType)) {
 
       if (!session) {
         session = this.instantiationService.createInstance(SingleSession, new Long(1), connector.user, interToLong(source.statustransto));
+        this.sessionServer.registerSession(session);
       }
-      const transformation = new Transformation(new Long(1), source, interToLong(source.statustransfrom), interToLong(source.statustransto));
 
+      const transformation = new Transformation(new Long(1), source, interToLong(source.statustransfrom), interToLong(source.statustransto));
       transformation.onDidEndlongRetry((data) => {
         this.transmit(Long.fromNumber(1), data.context, connector);
       });
       transformation.onDidacrossRetry((data) => {
         this.transmit(Long.fromNumber(1), data.context, connector);
       });
-
       session.registerTransition(transformation);
       transformation.start();
       return;
     }
-
+    
+    if (!session || session.has(Long.fromNumber(1))) {
+      this.notify(Long.fromNumber(1), connector);
+      return;
+    }
+    const transformation = session.has(Long.fromNumber(1));
     if (source.messageType === MessageType.Ack) {
+      transformation.entryEndlong();
+    }
 
+    if (source.messageType === MessageType.Notify) {
+      // transformation.entryacross();
+      // transformation.entryEndlong();
     }
   }
 }
