@@ -51,7 +51,8 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
       source.statustransto,
       source.statustransfrom,
     ];
-    connector.send(Buffer.from(encodeyuzhitalkproto(source)));
+    const protobuf = encodeyuzhitalkproto(source)
+    connector.send(Buffer.from(protobuf));
   }
 
   notify(id: Long, connector: Connector) {
@@ -91,10 +92,10 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
 
       const transformation = new Transformation(new Long(1), source, interToLong(source.statustransfrom), interToLong(source.statustransto));
       transformation.onDidEndlongRetry((data) => {
-        this.transmit(Long.fromNumber(1), data.context, connector);
+        this.transmit(data.sender, data.context.data, connector);
       });
       transformation.onDidacrossRetry((data) => {
-        this.transmit(Long.fromNumber(1), data.context, connector);
+        this.transmit(data.sender, data.context.data, connector);
       });
       session.registerTransition(transformation);
       transformation.start();
