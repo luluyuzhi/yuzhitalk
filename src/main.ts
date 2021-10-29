@@ -20,13 +20,13 @@ import { ISessionServer, SessionServer } from "./session/SessionServer";
 import { IIdServer, IdService } from "./id/idServer";
 import { IUserService, UserService } from "./user/server/UserServer";
 import { ICommonPropsHandlerCollection, ICommonPropsHandlerCollectionServer } from "./user/server/CommonPropsHandlerServer";
+import { ILogeServer, newLogger } from "./log";
 
 dotenv.config();
 
 class CoreMain {
   main(): void {
     try {
-      console.log(process.env.DB_HOST);
       this.startup();
     } catch (error) {
       console.error(error.message);
@@ -66,7 +66,9 @@ class CoreMain {
     collection.set(ICommonPropsHandlerCollection,
       new SyncDescriptor<ICommonPropsHandlerCollection>(ICommonPropsHandlerCollectionServer)
     );
-    
+    collection.set(ILogeServer,
+      newLogger("default")
+    );
     return new InstantiationService(collection);
   }
 }

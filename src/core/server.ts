@@ -8,6 +8,7 @@ import * as assert from "assert";
 import { Connector } from "./connector";
 import { ServerImp } from "../common/serverimp";
 import { returnAuthFail, returnAuthSuccess } from "../protocol/auth.utility";
+import { ILogeServer } from "yuzhi/log";
 
 export interface IServer {
   readonly _serviceBrand: undefined;
@@ -24,14 +25,15 @@ export class NetService extends ServerImp implements IServer {
   public constructor(
     private options: unknown,
     @IInstantiationService instantiationService: IInstantiationService,
-    @IProtocol protocol: IProtocol
+    @IProtocol protocol: IProtocol,
+    @ILogeServer private logeServer: ILogeServer
   ) {
     super();
     this.server = createServer(this.options, (socket: TLSSocket) => {
       const connector = instantiationService.createInstance(Connector, socket);
 
       socket.pause(); // 暂停接收 (nodejs default)
-      console.log(
+      logeServer.info(
         "server connected",
         socket.authorized ? "authorized" : "unauthorized"
       );
@@ -43,7 +45,7 @@ export class NetService extends ServerImp implements IServer {
         const message = this.Buffer(socket);
         if (message == null) return;
 
-        console.log(
+        logeServer.info(
           "ip:",
           socket.remoteAddress,
           "port",
@@ -63,11 +65,11 @@ export class NetService extends ServerImp implements IServer {
       });
 
       socket.on("error", function (e: Error) {
-        console.log("ip ", socket.remoteAddress, "error ", e.message);
+        logeServer.info("ip ", socket.remoteAddress, "error ", e.message);
       });
 
       socket.on("end", (reason) => {
-        console.log(reason);
+        logeServer.info(reason);
       });
     });
 
@@ -75,16 +77,17 @@ export class NetService extends ServerImp implements IServer {
   }
 
   private init() {
-    this.server.on("end", () => {});
+    this.server.on("end", () => { });
     this.server.on("error", function (e) {
-      console.log(e);
+      this.logeServer.info(e);
     });
   }
 
   Start(): void {
+    this.logeServer.info("server start");
     /* process.env["npm_package_config_port"] as unknown as number */
     this.server.listen(8080, () => {
-      console.log("server bound", process.env["npm_package_config_port"]);
+      this.logeServer.info("server bound", process.env["npm_package_config_port"]);
     });
   }
 }
