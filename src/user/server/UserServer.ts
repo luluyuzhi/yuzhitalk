@@ -9,8 +9,8 @@ import { ICommonPropsHandlerCollection } from "./CommonPropsHandlerServer";
 
 export interface IUserService extends ICommonProps {
   readonly _serviceBrand: undefined;
-  createUser(userId: number, connector: Connector): User;
-  getUser(userId: number): User;
+  createUser(userId: Long, connector: Connector): User;
+  getUser(userId: Long): User;
 }
 
 export const IUserService = createDecorator<IUserService>("IUserService");
@@ -24,7 +24,7 @@ export class UserService implements IUserService {
     @IInstantiationService private instantiationService: IInstantiationService
   ) {}
 
-  createUser(userId: number, connector: Connector) {
+  createUser(userId: Long, connector: Connector) {
     const user = this.instantiationService.createInstance(
       OnlionUser,
       userId,
@@ -35,14 +35,14 @@ export class UserService implements IUserService {
     return user;
   }
 
-  getUser(userId: number) {
+  getUser(userId: Long) {
     const user = this.commonPropsHandlerCollection.getCommonPropsHandler(
       `yuzhi://user:yu@.com:${userId}`
     ) as User | undefined;
     return user ?? this.createVirtualUser(userId);
   }
 
-  private createVirtualUser(userId: number) {
+  private createVirtualUser(userId: Long) {
     const user = this.instantiationService.createInstance(VirtualUser, userId);
     this.commonPropsHandlerCollection.registerCommonPropsHandler(
       `yuzhi://user:yu@.com:${userId}`,

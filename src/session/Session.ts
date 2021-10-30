@@ -19,12 +19,12 @@ export interface IChannel extends IUnique<Long> {
   inject(context: any);
 }
 
-export class Session implements IUnique<Long>, ISession {
+export class Session implements IUnique<string>, ISession {
 
   private transformations = new SelfDictionary<Long, Transformation>();
 
   constructor(
-    private id: Long,
+    private ids: Long[],
     @ISessionServer private sessionServer: ISessionServer,
     private sessionType: "singleChat" | "groupChat" = 'singleChat',
   ) {
@@ -48,19 +48,19 @@ export class Session implements IUnique<Long>, ISession {
   }
 
   Unique() {
-    return this.id;
+    return this.sessionServer.generateSessionId(this.ids, this.sessionType);
   }
 }
 
 export class SingleSession extends Session {
 
-  constructor(id: Long,
+  constructor(
     private creater: User,
-    private pointer: User | Long,  // IUnique<Long>,
+    private pointer: User | IUnique<Long>,
     @ISessionServer sessionServer: ISessionServer,
     @IUserService private userService: IUserService
   ) {
-    super(id, sessionServer, 'singleChat');
+    super([creater.Unique(), pointer.Unique()], sessionServer, 'singleChat');
     const self = this;
     this.creater.getSubscription().registerChannel(
       new class implements IChannel {
@@ -68,7 +68,7 @@ export class SingleSession extends Session {
           if (self.pointer instanceof Long) {
             return self.pointer;
           }
-          return self.pointer.Unique() as unknown as Long;
+          return self.pointer.Unique();
         }
 
         registerTransition(transformation: Transformation) {
@@ -76,12 +76,12 @@ export class SingleSession extends Session {
         }
 
         inject(context: any) {
-          if (self.pointer instanceof Long) {
-            const user = self.userService.getUser(self.pointer as unknown as number);
-            user.handle(context);
+          if (self.pointer instanceof User) {
+            self.pointer.handle(context);
             return;
           }
-          self.pointer.handle(context);
+          const user = self.userService.getUser(self.pointer.Unique());
+          user.handle(context);
         }
       }
     );
@@ -92,6 +92,6 @@ class SeriesSession extends Session {
 
   constructor(id: Long,
     @ISessionServer sessionServer: ISessionServer,) {
-    super(id, sessionServer, 'groupChat');
+    super([id], sessionServer, 'groupChat');
   }
-}
+};

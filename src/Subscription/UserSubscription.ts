@@ -13,7 +13,7 @@ export class UserSubscription extends Subscription {
   static readonly hint = `lulu://user:subscription@chat.yuzhi.com:`;
 
   constructor(
-    private readonly owner: ICommonPropsHandler<number>,
+    private readonly owner: ICommonPropsHandler<Long>,
     @ISubscriptionServer subscriptionServer: ISubscriptionServer
   ) {
     super(UserSubscription.hint + owner.Unique(), subscriptionServer);

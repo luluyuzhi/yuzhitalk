@@ -33,7 +33,7 @@ export class TransformationServer implements ITransformationServer {
     ) {
         const transformation = new Transformation(this.idServer.gen(), content, sender.Unique() as unknown as Long,
             receiver as Long);
-            
+
         return transformation;
     }
 }

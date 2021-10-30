@@ -1,4 +1,5 @@
 import { createDecorator } from "yuzhi/instantiation/common/instantiation";
+import { ILogeServer } from "yuzhi/log";
 import { Connector } from "../core/connector";
 import {
   yuzhitalkproto as YuzhitalkProto,
@@ -17,9 +18,9 @@ export class Protocol implements IProtocol {
   declare readonly _serviceBrand: undefined;
 
   constructor(
-    @IProtocolCollocationServer
-    private collocationServer: IProtocolCollocationServer
-  ) {}
+    @IProtocolCollocationServer private collocationServer: IProtocolCollocationServer,
+    @ILogeServer private logeServer: ILogeServer
+  ) { }
 
   public handleProtocol(content: Buffer, connector: Connector) {
     const yuzhiProtocol = this.decode(content);
@@ -34,6 +35,9 @@ export class Protocol implements IProtocol {
     try {
       yuzhiProtocol = decodeyuzhitalkproto(content);
     } catch (e) {
+      this.logeServer
+        .new(() => { }, __filename)
+        .warn(`decode yuzhitalkproto error: ${e}`);
       return undefined;
     }
     return yuzhiProtocol;

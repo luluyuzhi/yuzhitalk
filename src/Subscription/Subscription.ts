@@ -10,7 +10,7 @@ import { MaxPriorityQueue } from "datastructures-js";
 
 // lulu://sendtype:group@yuzhi.com:{id}/
 // lulu://sendtype:person@yuzhi.com:{id}/
-export interface ISubscription extends IUnique<number> {
+export interface ISubscription extends IUnique<Long> {
   readonly subscript: string;
   type(): string;
   handle(id: Long, context: any): void;
@@ -18,7 +18,7 @@ export interface ISubscription extends IUnique<number> {
 }
 
 export abstract class Subscription implements ISubscription {
-  private id: number;
+  private id: Long;
   private readonly subscripturi: URI.URIComponents;
 
   private selfDictionary = new SelfDictionary<Long, IChannel>();
@@ -29,7 +29,7 @@ export abstract class Subscription implements ISubscription {
     @ISubscriptionServer protected subscriptionServer: ISubscriptionServer
   ) {
     this.subscripturi = URI.parse(subscript);
-    this.id = Number(this.subscripturi.host);
+    this.id = Long.fromString(this.subscripturi?.host ?? '0');
     this.subscriptionServer.addSubscription(this);
   }
 

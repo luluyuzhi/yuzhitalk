@@ -25,8 +25,9 @@ import { Session, SingleSession } from "yuzhi/session/Session";
 import { Transformation } from "yuzhi/session/Transformation";
 import { User } from "yuzhi/user/User";
 import { IUserService } from "yuzhi/user/server/UserServer";
+import { ILogeServer } from "yuzhi/log";
 
-export function interToLong<T extends ILong>(e: T | undefined) {
+export function $L<T extends ILong>(e: T | undefined) {
   return e ? new Long(e.low, e.low, e.unsigned) : undefined;
 }
 
@@ -44,6 +45,7 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
     @IInstantiationService private instantiationService: IInstantiationService,
     @ISessionServer private sessionServer: ISessionServer,
     @IUserService private userService: IUserService,
+    @ILogeServer private logeServer: ILogeServer,
   ) { }
 
   transmit(id: Long, source: yuzhitalkproto, connector: Connector) {
@@ -51,7 +53,7 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
       source.statustransto,
       source.statustransfrom,
     ];
-    const protobuf = encodeyuzhitalkproto(source)
+    const protobuf = encodeyuzhitalkproto(source);
     connector.send(Buffer.from(protobuf));
   }
 
@@ -65,6 +67,20 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
       transfromNotify: {},
     } as yuzhitalkproto;
     connector.user.getSubscription().handle(id, notify);
+  }
+
+  notify1(id: Long, connector: Connector) {
+
+    const notify = {
+      messageType: MessageType.Notify,
+      timestamp: { unsigned: false, low: 0, high: 0 },
+      statustransfrom: { unsigned: false, low: 0, high: 0 },
+      statustransto: { unsigned: false, low: 0, high: 0 },
+      id: { unsigned: false, low: 0, high: 0 },
+      transfromNotify: {},
+    } as yuzhitalkproto;
+    const protobuf = encodeyuzhitalkproto(notify);
+    connector.send(Buffer.from(protobuf));
   }
 
   acks(id: Long, connector: Connector) {
@@ -81,39 +97,55 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
 
   handleSource(source: yuzhitalkproto, connector: Connector) {
 
-    connector.user = this.userService.createUser(1, connector);
-    let session = this.sessionServer.getSession(new Long(1));
+    const loger = this.logeServer;
+
+    loger.debug("message from", `${$L(source.statustransfrom)}`, "message to", `${$L(source.statustransto)}`, "message type is", source.messageType);
+
+    //#region  test
+    connector.user = this.userService.createUser($L(source.statustransfrom), connector);
+    //#endregion  test
+
+    const ids = [$L(source.statustransfrom), $L(source.statustransto)];
+    const sessionId = this.sessionServer.generateSessionId(ids, 'singleChat');
+    const transformationId = $L(source.timestamp);
+
+    let session = this.sessionServer.getSession(sessionId);
     if (![MessageType.Ack, MessageType.Notify].includes(source.messageType)) {
 
       if (!session) {
-        session = this.instantiationService.createInstance(SingleSession, new Long(1), connector.user, interToLong(source.statustransto));
+        session = this.instantiationService.createInstance(SingleSession,
+          connector.user, { Unique() { return $L(source.statustransto); } });
         this.sessionServer.registerSession(session);
+
+      } else if (!!session?.has(transformationId)) {
+        session.has(transformationId).notifyEndlog();
+        return;
       }
 
-      const transformation = new Transformation(new Long(1), source, interToLong(source.statustransfrom), interToLong(source.statustransto));
-      transformation.onDidEndlongRetry((data) => {
-        this.transmit(data.sender, data.context.data, connector);
-      });
-      transformation.onDidacrossRetry((data) => {
-        this.transmit(data.sender, data.context.data, connector);
-      });
+      const transformation = new Transformation(transformationId, source, ids[0], ids[1]);
+      this.transformationHandle(transformation, connector);
       session.registerTransition(transformation);
       transformation.start();
       return;
     }
-    
-    if (!session || session.has(Long.fromNumber(1))) {
-      this.notify(Long.fromNumber(1), connector);
-      return;
-    }
-    const transformation = session.has(Long.fromNumber(1));
-    if (source.messageType === MessageType.Ack) {
-      transformation.entryEndlong();
-    }
 
-    if (source.messageType === MessageType.Notify) {
-      // transformation.entryacross();
-      // transformation.entryEndlong();
+    if (!session) return;
+    const transformation = session.has(transformationId);
+    if (source.messageType === MessageType.Ack) {
+      transformation?.entryEndlong();
     }
+  }
+
+  private transformationHandle(t: Transformation, connector: Connector) {
+    t.onDidEndlongRetry((data) => {
+      this.transmit(data.sender, data.context.data, connector);
+    });
+    t.onDidacrossRetry((data) => {
+      this.transmit(data.sender, data.context.data, connector);
+    });
+
+    t.onDidhandleNotify((data) => {
+      this.notify1(data.sender, connector);
+    });
   }
 }

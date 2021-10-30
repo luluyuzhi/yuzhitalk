@@ -3,6 +3,7 @@ import { IInstantiationService } from "yuzhi/instantiation/common/instantiation"
 import { IRemoteAuthServer } from "yuzhi/outlet/client";
 import { User } from "yuzhi/user/User";
 import { IUserService } from "yuzhi/user/server/UserServer";
+import Long = require("long");
 
 export interface IConnector {
   auth(s: Buffer): Promise<boolean>;
@@ -14,7 +15,7 @@ export class Connector implements IConnector {
     private socket: TLSSocket,
     @IRemoteAuthServer private remoteAuthServer: IRemoteAuthServer,
     @IUserService private userService: IUserService,
-    @IInstantiationService private instantiationService: IInstantiationService // @IAuthServer private authServer: IAuthServer // @IUserService userService
+    @IInstantiationService private instantiationService: IInstantiationService
   ) { }
 
   public user?: User;
@@ -36,7 +37,7 @@ export class Connector implements IConnector {
       if (authStatus.code.low == 0) {
         return true;
       }
-      this.user = this.userService.createUser(6, this);
+      this.user = this.userService.createUser(Long.fromNumber(1), this);
     } catch {
       this.socket.end();
       return false;

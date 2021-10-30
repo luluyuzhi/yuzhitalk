@@ -1,7 +1,7 @@
 import { createDecorator } from "yuzhi/instantiation/common/instantiation";
 import { ICommonPropsHandler } from "../common";
 
-type unique_type = number;
+type unique_type = Long;
 type key_type = string;
 
 export interface ICommonPropsHandlerCollection {

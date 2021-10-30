@@ -12,11 +12,15 @@ interface ITransformation {
 
 export class Transformation extends State implements IUnique<Long> {
 
+
     private readonly _onDidEndlongRetry = new Emitter<ITransformation>();
     public readonly onDidEndlongRetry: Event<ITransformation> = this._onDidEndlongRetry.event;
 
     private readonly _onDidacrossRetry = new Emitter<ITransformation>();
     public readonly onDidacrossRetry: Event<ITransformation> = this._onDidacrossRetry.event;
+
+    private readonly _onDidhandleNotify = new Emitter<ITransformation>();
+    public readonly onDidhandleNotify: Event<ITransformation> = this._onDidhandleNotify.event;
 
     transformationId: Long;
 
@@ -33,6 +37,13 @@ export class Transformation extends State implements IUnique<Long> {
 
     acrossRetry(context: IExtreContext, event: any): void {
         this._onDidacrossRetry.fire({
+            sender: this.sender,
+            context
+        });
+    }
+
+    handleNotify(context: IExtreContext, event: any): void {
+        this._onDidhandleNotify.fire({
             sender: this.sender,
             context
         });

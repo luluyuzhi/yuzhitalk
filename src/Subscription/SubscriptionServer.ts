@@ -25,14 +25,13 @@ export class SubscriptionServer implements ISubscriptionServer {
 
   constructor(
     @IInstantiationService private instantiationService: IInstantiationService
-  ) {}
+  ) { }
 
   addSubscription(subscription: Subscription): Subscription {
     let priorityQueue = this.subscriptions.get(subscription.subscript);
     if (priorityQueue == undefined) {
       priorityQueue = new MaxPriorityQueue<Subscription>({
-        priority: (e) => e.Unique(),
-        compare: (e1, e2) => e1.Unique() - e2.Unique(),
+        compare: (e1, e2) => e1.Unique().compare(e2.Unique()),
       });
 
       this.subscriptions.set(subscription.subscript, priorityQueue);

@@ -6,7 +6,7 @@ import * as Long from "long";
 import { Subscription } from "../subscription/Subscription";
 import { IChannel } from "yuzhi/session/Session";
 
-type unique_type = number;
+type unique_type = Long;
 
 export abstract class User implements ICommonPropsHandler<unique_type> {
   readonly type = "person";

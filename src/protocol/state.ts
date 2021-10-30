@@ -30,13 +30,22 @@ export abstract class State implements IState {
       actions: {
         endlong_retry: this.endlongRetry.bind(this),
         across_retry: this.acrossRetry.bind(this),
+        handle_notify: this.handleNotify.bind(this),
       },
     });
 
     this.yuStatesService = interpret(yuStates).onTransition((state, event) => {
-      console.log(state);
+      if (state.matches({ endlong: "handle" })) { }
     });
     this.yuStatesService.subscribe();
+  }
+
+  public notifyEndlog() {
+    if (this.yuStatesService.state.matches({ endlong: "handle" })) {
+      this.yuStatesService.send("notify");
+      return;
+    }
+    console.log('ignore message');
   }
 
   start(): void {
@@ -58,4 +67,5 @@ export abstract class State implements IState {
 
   abstract endlongRetry(context: IExtreContext, event: any): void;
   abstract acrossRetry(context: IExtreContext, event: any): void;
+  abstract handleNotify(context: IExtreContext, event: any): void;
 }

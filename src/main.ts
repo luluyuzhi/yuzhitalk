@@ -41,7 +41,8 @@ class CoreMain {
   }
 
   private createServices(): IInstantiationService {
-    let collection = new ServiceCollection();
+    const collection = new ServiceCollection();
+
     collection.set(IProtocol, new SyncDescriptor<IProtocol>(Protocol));
     collection.set(
       IProtocolCollocationServer,
@@ -73,6 +74,4 @@ class CoreMain {
   }
 }
 
-const coreMain = new CoreMain();
-
-coreMain.main();
+new CoreMain().main();

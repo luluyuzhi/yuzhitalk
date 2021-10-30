@@ -63,11 +63,16 @@ export const manich = () =>
               invoke: {
                 id: "handle",
                 src: (context, event) => (callback, onReceive) => {
+                  callback('handle_notify');
                   const id = setInterval(() => callback("INC"), 1000);
                   return () => clearInterval(id);
                 },
               },
               on: {
+                notify: {
+                  target: "handle",
+                  actions:['handle_notify'],
+                },
                 continue: {
                   target: "#yustates.across.hist",
                   cond: "nextStates",
@@ -159,6 +164,9 @@ export const manich = () =>
         },
         endlong_retry: (context, event) => {
           throw new Error("need implements endlong_retry");
+        },
+        handle_notify: (context, event) => {
+          throw new Error("need implements handle_notify");
         },
       },
       delays: {
