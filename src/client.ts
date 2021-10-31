@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as pbjs from "pbjs";
 import {
   encodeyuzhitalkproto,
+  decodeyuzhitalkproto,
   intToLong,
   MessageType,
   yuzhitalkproto,
@@ -61,7 +62,8 @@ const socket = tls.connect(8080, options, () => {
 
 // socket.setEncoding('utf8');
 socket.on("data", (data) => {
-  console.log(data);
+  const res = decodeyuzhitalkproto(data);
+  console.log(res);
 });
 socket.on("end", () => {
   console.log("server disconnect!");
