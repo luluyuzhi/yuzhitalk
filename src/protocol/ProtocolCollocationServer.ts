@@ -48,51 +48,77 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
     @ILogeServer private logeServer: ILogeServer,
   ) { }
 
-  transmit(id: Long, source: yuzhitalkproto, connector: Connector) {
-    [source.statustransfrom, source.statustransto] = [
-      source.statustransto,
-      source.statustransfrom,
+  /**
+   * 
+   * @param id 接受者id
+   * @param content 消息内容 
+   * @param connector 发起者
+   */
+  transmit(id: Long, content: yuzhitalkproto, connector: Connector) {
+    [content.statustransfrom, content.statustransto] = [
+      content.statustransto,
+      content.statustransfrom,
     ];
-    const protobuf = encodeyuzhitalkproto(source);
-    connector.send(Buffer.from(protobuf));
+    const protobuf = encodeyuzhitalkproto(content);
+    connector.user.getSubscription().handle(id, Buffer.from(protobuf));
   }
 
-  notify(id: Long, connector: Connector) {
+  /**
+   * 
+   * @param id  接受者id
+   * @param timestamp 消息时间戳
+   * @param connector 发起者
+   * @param globalsId 消息全局 id，可选
+   */
+  notify(id: Long, timestamp: Long, connector: Connector, globalsId?: Long) {
     const notify = {
       messageType: MessageType.Notify,
-      timestamp: { unsigned: false, low: 0, high: 0 },
+      timestamp: timestamp,
       statustransfrom: { unsigned: false, low: 0, high: 0 },
       statustransto: { unsigned: false, low: 0, high: 0 },
-      id: { unsigned: false, low: 0, high: 0 },
+      id: globalsId ?? { unsigned: false, low: 0, high: 0 },
       transfromNotify: {},
     } as yuzhitalkproto;
     connector.user.getSubscription().handle(id, notify);
   }
 
-  notify1(id: Long, connector: Connector) {
-
+  notify1(timestamp: Long, connector: Connector, globalsId?: Long) {
     const notify = {
       messageType: MessageType.Notify,
-      timestamp: { unsigned: false, low: 0, high: 0 },
+      timestamp: timestamp,
       statustransfrom: { unsigned: false, low: 0, high: 0 },
       statustransto: { unsigned: false, low: 0, high: 0 },
-      id: { unsigned: false, low: 0, high: 0 },
+      id: globalsId ?? { unsigned: false, low: 0, high: 0 },
       transfromNotify: {},
     } as yuzhitalkproto;
     const protobuf = encodeyuzhitalkproto(notify);
     connector.send(Buffer.from(protobuf));
   }
 
-  acks(id: Long, connector: Connector) {
+  ack(id: Long, timestamp: Long, connector: Connector, globalsId?: Long) {
     const ack = {
       messageType: MessageType.Ack,
-      timestamp: { unsigned: false, low: 0, high: 0 },
+      timestamp: timestamp,
       statustransfrom: { unsigned: false, low: 0, high: 0 },
       statustransto: { unsigned: false, low: 0, high: 0 },
-      id: { unsigned: false, low: 0, high: 0 },
+      id: globalsId ?? { unsigned: false, low: 0, high: 0 },
       transfromAck: { ack: "ok" },
     } as yuzhitalkproto;
-    connector.user.getSubscription().handle(id, ack);
+    const protobuf = encodeyuzhitalkproto(ack);
+    connector.user.getSubscription().handle(id, protobuf);
+  }
+
+  ack1(timestamp: Long, connector: Connector, globalsId?: Long) {
+    const ack = {
+      messageType: MessageType.Ack,
+      timestamp: timestamp,
+      statustransfrom: { unsigned: false, low: 0, high: 0 },
+      statustransto: { unsigned: false, low: 0, high: 0 },
+      id: globalsId ?? { unsigned: false, low: 0, high: 0 },
+      transfromAck: { ack: "ok" },
+    } as yuzhitalkproto;
+    const protobuf = encodeyuzhitalkproto(ack);
+    connector.send(Buffer.from(protobuf));
   }
 
   handleSource(source: yuzhitalkproto, connector: Connector) {
@@ -101,9 +127,9 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
 
     loger.debug("message from", `${$L(source.statustransfrom)}`, "message to", `${$L(source.statustransto)}`, "message type is", source.messageType);
 
-    //#region  test
+    //#region test
     connector.user = this.userService.createUser($L(source.statustransfrom), connector);
-    //#endregion  test
+    //#endregion test
 
     const ids = [$L(source.statustransfrom), $L(source.statustransto)];
     const sessionId = this.sessionServer.generateSessionId(ids, 'singleChat');
@@ -139,13 +165,15 @@ export class ProtocolCollocationServer implements IProtocolCollocationServer {
   private transformationHandle(t: Transformation, connector: Connector) {
     t.onDidEndlongRetry((data) => {
       this.transmit(data.sender, data.context.data, connector);
+      this.ack1(data.context.data.timestamp, connector, data.context.data.id);
     });
     t.onDidacrossRetry((data) => {
-      this.transmit(data.sender, data.context.data, connector);
+      this.notify1(data.context.data.timestamp, connector, data.context.data.id);
+      this.ack(data.context.data.statustransto, data.context.data.timestamp, connector, data.context.data.id);
     });
 
     t.onDidhandleNotify((data) => {
-      this.notify1(data.sender, connector);
+      this.ack1(data.context.data.timestamp, connector, data.context.data.id);
     });
   }
 }

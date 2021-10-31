@@ -42,8 +42,7 @@ export abstract class Subscription implements ISubscription {
   }
 
   handle(id: Long, context: any): void {
-    const channel = this.getChannels(id);
-    channel.inject(context);
+    this.getChannels(id)?.inject(context);
   }
 
   type(): string {
